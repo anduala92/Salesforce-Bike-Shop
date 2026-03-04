@@ -1,0 +1,276 @@
+openapi: 3.0.3
+info:
+  title: Bike Shop REST API
+  version: 1.0.0
+  description: Salesforce Apex REST API for university coursework.
+servers:
+  - url: /services/apexrest/bikeshop/v1
+security:
+  - SalesforceSession: []
+paths:
+  /bikes:
+    get:
+      summary: List bikes
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paged bikes list
+    post:
+      summary: Create bike
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BikeInput'
+      responses:
+        '201':
+          description: Bike created
+  /bikes/{id}:
+    patch:
+      summary: Update bike
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BikeInput'
+      responses:
+        '200':
+          description: Bike updated
+    delete:
+      summary: Delete bike
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Bike deleted
+  /customers:
+    get:
+      summary: List customers
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paged customers list
+    post:
+      summary: Create customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerInput'
+      responses:
+        '201':
+          description: Customer created
+  /customers/{id}:
+    patch:
+      summary: Update customer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerInput'
+      responses:
+        '200':
+          description: Customer updated
+    delete:
+      summary: Delete customer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Customer deleted
+  /rentals:
+    get:
+      summary: List rentals
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+        - in: query
+          name: status
+          schema:
+            type: string
+        - in: query
+          name: customerId
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paged rentals list
+    post:
+      summary: Create rental
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RentalInput'
+      responses:
+        '201':
+          description: Rental created
+  /rentals/{id}:
+    patch:
+      summary: Update rental
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RentalInput'
+      responses:
+        '200':
+          description: Rental updated
+    delete:
+      summary: Delete rental
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Rental deleted
+components:
+  securitySchemes:
+    SalesforceSession:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Bearer token from Salesforce OAuth login.
+  schemas:
+    BikeInput:
+      type: object
+      required: [Model__c, Brand__c, Category__c, Daily_Rate__c]
+      properties:
+        Name:
+          type: string
+          maxLength: 80
+        Model__c:
+          type: string
+          maxLength: 80
+        Brand__c:
+          type: string
+          maxLength: 80
+        Category__c:
+          type: string
+          maxLength: 40
+        Daily_Rate__c:
+          type: number
+        Available__c:
+          type: boolean
+        Mileage__c:
+          type: integer
+        Last_Service_Date__c:
+          type: string
+          format: date
+    CustomerInput:
+      type: object
+      required: [First_Name__c, Last_Name__c, Email__c]
+      properties:
+        Name:
+          type: string
+          maxLength: 80
+        First_Name__c:
+          type: string
+          maxLength: 50
+        Last_Name__c:
+          type: string
+          maxLength: 50
+        Email__c:
+          type: string
+          format: email
+          maxLength: 80
+        Phone__c:
+          type: string
+        Birth_Date__c:
+          type: string
+          format: date
+        Loyalty_Points__c:
+          type: integer
+        Is_Active__c:
+          type: boolean
+    RentalInput:
+      type: object
+      required: [Bike__c, Customer__c, Start_Date__c, End_Date__c, Daily_Price__c, Status__c]
+      properties:
+        Bike__c:
+          type: string
+        Customer__c:
+          type: string
+        Start_Date__c:
+          type: string
+          format: date
+        End_Date__c:
+          type: string
+          format: date
+        Daily_Price__c:
+          type: number
+        Total_Amount__c:
+          type: number
+        Status__c:
+          type: string
+          maxLength: 40
+        Paid__c:
+          type: boolean

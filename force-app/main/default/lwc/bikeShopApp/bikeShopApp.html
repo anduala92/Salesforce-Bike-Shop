@@ -1,0 +1,143 @@
+<template>
+    <lightning-card title="Bike Shop Management" icon-name="standard:product_request">
+        <div class="wrapper">
+            <template if:true={errorMessage}>
+                <div class="slds-text-color_error slds-m-bottom_small">{errorMessage}</div>
+            </template>
+
+            <lightning-tabset>
+                <lightning-tab label="Bikes">
+                    <div class="section">
+                        <div class="toolbar">
+                            <lightning-input
+                                type="search"
+                                label="Search bikes"
+                                value={bikeSearch}
+                                data-search="bike"
+                                onchange={handleSearchChange}
+                            ></lightning-input>
+                            <lightning-button variant="brand" label="Search" onclick={loadBikes}></lightning-button>
+                            <lightning-button label="New" onclick={resetBikeForm}></lightning-button>
+                            <lightning-button variant="destructive" label="Delete selected" onclick={deleteBike}></lightning-button>
+                        </div>
+
+                        <lightning-datatable
+                            key-field="Id"
+                            data={bikes}
+                            columns={bikeColumns}
+                            onrowselection={handleBikeSelection}
+                        ></lightning-datatable>
+
+                        <div class="pager">Page {bikePage} / {bikeTotalPages} · Total {bikeTotal}</div>
+                        <div class="toolbar">
+                            <lightning-button label="Prev" onclick={prevBikePage}></lightning-button>
+                            <lightning-button label="Next" onclick={nextBikePage}></lightning-button>
+                        </div>
+
+                        <div class="form-grid">
+                            <lightning-input label="Id (for update)" value={bikeForm.Id} disabled></lightning-input>
+                            <lightning-input label="Name" value={bikeName} disabled></lightning-input>
+                            <lightning-input required label="Model" value={bikeForm.aiops_education__Model__c} data-entity="bike" data-field="aiops_education__Model__c" onchange={handleFormInput}></lightning-input>
+                            <lightning-input required label="Brand" value={bikeForm.aiops_education__Brand__c} data-entity="bike" data-field="aiops_education__Brand__c" onchange={handleFormInput}></lightning-input>
+                            <lightning-input required label="Category" value={bikeForm.aiops_education__Category__c} data-entity="bike" data-field="aiops_education__Category__c" onchange={handleFormInput}></lightning-input>
+                            <lightning-input required type="number" min="0.01" step="0.01" label="Daily Rate" value={bikeForm.aiops_education__Daily_Rate__c} data-entity="bike" data-field="aiops_education__Daily_Rate__c" onchange={handleFormInput}></lightning-input>
+                            <lightning-input type="number" label="Mileage" value={bikeForm.aiops_education__Mileage__c} data-entity="bike" data-field="aiops_education__Mileage__c" onchange={handleFormInput}></lightning-input>
+                            <lightning-input type="date" label="Last Service" value={bikeForm.aiops_education__Last_Service_Date__c} max={todayDate} data-entity="bike" data-field="aiops_education__Last_Service_Date__c" onchange={handleFormInput}></lightning-input>
+                            <lightning-input type="checkbox" label="Available" checked={bikeForm.aiops_education__Available__c} data-entity="bike" data-field="aiops_education__Available__c" onchange={handleFormCheckbox}></lightning-input>
+                        </div>
+                        <lightning-button variant="brand" label="Save Bike" onclick={saveBike}></lightning-button>
+                    </div>
+                </lightning-tab>
+
+                <lightning-tab label="Customers">
+                    <div class="section">
+                        <div class="toolbar">
+                            <lightning-input
+                                type="search"
+                                label="Search customers"
+                                value={customerSearch}
+                                data-search="customer"
+                                onchange={handleSearchChange}
+                            ></lightning-input>
+                            <lightning-button variant="brand" label="Search" onclick={loadCustomers}></lightning-button>
+                            <lightning-button label="New" onclick={resetCustomerForm}></lightning-button>
+                            <lightning-button variant="destructive" label="Delete selected" onclick={deleteCustomer}></lightning-button>
+                        </div>
+
+                        <lightning-datatable
+                            key-field="Id"
+                            data={customers}
+                            columns={customerColumns}
+                            onrowselection={handleCustomerSelection}
+                        ></lightning-datatable>
+
+                        <div class="pager">Page {customerPage} / {customerTotalPages} · Total {customerTotal}</div>
+                        <div class="toolbar">
+                            <lightning-button label="Prev" onclick={prevCustomerPage}></lightning-button>
+                            <lightning-button label="Next" onclick={nextCustomerPage}></lightning-button>
+                        </div>
+
+                        <div class="form-grid">
+                            <lightning-input label="Id (for update)" value={customerForm.Id} disabled></lightning-input>
+                            <lightning-input required label="First Name" value={customerForm.aiops_education__First_Name__c} data-entity="customer" data-field="aiops_education__First_Name__c" onchange={handleFormInput}></lightning-input>
+                            <lightning-input required label="Last Name" value={customerForm.aiops_education__Last_Name__c} data-entity="customer" data-field="aiops_education__Last_Name__c" onchange={handleFormInput}></lightning-input>
+                            <lightning-input required type="email" label="Email" value={customerForm.aiops_education__Email__c} data-entity="customer" data-field="aiops_education__Email__c" onchange={handleFormInput}></lightning-input>
+                            <lightning-input type="tel" label="Phone" value={customerForm.aiops_education__Phone__c} data-entity="customer" data-field="aiops_education__Phone__c" onchange={handleFormInput}></lightning-input>
+                            <lightning-input type="date" label="Birth Date" value={customerForm.aiops_education__Birth_Date__c} data-entity="customer" data-field="aiops_education__Birth_Date__c" onchange={handleFormInput}></lightning-input>
+                            <lightning-input type="number" label="Loyalty Points" value={customerForm.aiops_education__Loyalty_Points__c} data-entity="customer" data-field="aiops_education__Loyalty_Points__c" onchange={handleFormInput}></lightning-input>
+                            <lightning-input type="checkbox" label="Is Active" checked={customerForm.aiops_education__Is_Active__c} data-entity="customer" data-field="aiops_education__Is_Active__c" onchange={handleFormCheckbox}></lightning-input>
+                        </div>
+                        <lightning-button variant="brand" label="Save Customer" onclick={saveCustomer}></lightning-button>
+                    </div>
+                </lightning-tab>
+
+                <lightning-tab label="Rentals">
+                    <div class="section">
+                        <div class="toolbar">
+                            <lightning-input
+                                type="search"
+                                label="Filter by status"
+                                value={rentalStatusFilter}
+                                data-search="rental"
+                                onchange={handleSearchChange}
+                            ></lightning-input>
+                            <lightning-button variant="brand" label="Filter" onclick={loadRentals}></lightning-button>
+                            <lightning-button label="New" onclick={resetRentalForm}></lightning-button>
+                            <lightning-button variant="destructive" label="Delete selected" onclick={deleteRental}></lightning-button>
+                        </div>
+
+                        <lightning-datatable
+                            key-field="Id"
+                            data={rentals}
+                            columns={rentalColumns}
+                            onrowselection={handleRentalSelection}
+                        ></lightning-datatable>
+
+                        <div class="pager">Page {rentalPage} / {rentalTotalPages} · Total {rentalTotal}</div>
+                        <div class="toolbar">
+                            <lightning-button label="Prev" onclick={prevRentalPage}></lightning-button>
+                            <lightning-button label="Next" onclick={nextRentalPage}></lightning-button>
+                        </div>
+
+                        <div class="form-grid">
+                            <lightning-input label="Id (for update)" value={rentalForm.Id} disabled></lightning-input>
+                            <lightning-combobox required label="Bike" value={rentalForm.aiops_education__Bike__c} options={bikeOptions} onchange={handleBikeChange}></lightning-combobox>
+                            <lightning-combobox required label="Customer" value={rentalForm.aiops_education__Customer__c} options={customerOptions} onchange={handleCustomerChange}></lightning-combobox>
+                            <lightning-input required type="date" label="Start Date" value={rentalForm.aiops_education__Start_Date__c} min={todayDate} data-entity="rental" data-field="aiops_education__Start_Date__c" onchange={handleFormInput}></lightning-input>
+                            <lightning-input required type="date" label="End Date" value={rentalForm.aiops_education__End_Date__c} min={rentalForm.aiops_education__Start_Date__c} data-entity="rental" data-field="aiops_education__End_Date__c" onchange={handleFormInput}></lightning-input>
+                            <lightning-input type="number" min="0.01" step="0.01" label="Daily Price" value={rentalForm.aiops_education__Daily_Price__c} disabled></lightning-input>
+                            <lightning-combobox required label="Status" value={rentalForm.aiops_education__Status__c} options={statusOptions} onchange={handleStatusChange}></lightning-combobox>
+                            <lightning-input type="checkbox" label="Paid" checked={rentalForm.aiops_education__Paid__c} data-entity="rental" data-field="aiops_education__Paid__c" onchange={handleFormCheckbox}></lightning-input>
+                            <div style="grid-column: span 2; padding: 10px; background-color: #f0f0f0; border-radius: 4px;">
+                                <div style="font-weight: bold; margin-bottom: 5px;">Rental Summary</div>
+                                <div>Days: {rentalTotalDays}</div>
+                                <div style="font-size: 18px; font-weight: bold; color: #06a5da;">Total: {rentalTotalAmount} BGN</div>
+                            </div>
+                        </div>
+                        <lightning-button variant="brand" label="Save Rental" onclick={saveRental}></lightning-button>
+                    </div>
+                </lightning-tab>
+            </lightning-tabset>
+        </div>
+    </lightning-card>
+</template>

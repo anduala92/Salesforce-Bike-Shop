@@ -1,106 +1,151 @@
-# Bike Shop Coursework (Salesforce)
+# Bike Shop - Salesforce Coursework
 
-## Данни за студент
-- Факултетен номер: `2401322033`
-- Име на проект: `Bike Shop Management System`
+**Студент**: Aleksandar Aleksandrov (Факултетен номер: `2401322033`)
 
-## Кратко описание
-Приложение на тема **Bike Shop**, реализирано в Salesforce, с две части:
-- **Back-end**: Apex REST уеб услуги (`/services/apexrest/bikeshop/v1/...`)
-- **Front-end**: Lightning Web Component `bikeShopApp`, използващ REST услугите
+## 📋 Кратко
 
-## Изпълнение на изискванията
+REST API за управление на велосипеди, клиенти и наемания. Реализирано в Salesforce с:
+- ✅ **3 Custom Objects**: Bike__c, Customer__c, Bike_Rental__c (с връзки и валидация)
+- ✅ **3 REST Services**: GET/POST/PATCH/DELETE операции + search + pagination
+- ✅ **OpenAPI документация**: `docs/openapi.yaml` (Swagger)
+- ✅ **Postman колекция**: `docs/postman-collection.json` (15 готови заявки)
+- ✅ **LWC UI**: `bikeShopApp` компонент
+- ✅ **Unit тестове**: 115/115 тестове преминават
 
-### 1) База данни
-- Използвани са 3 свързани таблици (custom objects):
-	- `Bike__c`
-	- `Customer__c`
-	- `Bike_Rental__c` (връзка към `Bike__c` и `Customer__c`)
-- Всяка таблица има минимум 6 колони, с минимум 4 различни типа.
-- Всяка таблица има поне 1 задължително поле, различно от primary key (`Model__c`, `First_Name__c`, `Last_Name__c`, `Email__c`, `Bike__c`, `Customer__c`, `Start_Date__c`, `End_Date__c`, и др.).
-- Текстовите полета имат ограничение за дължина (`length`/`maxLength`).
+## ⚡ Бързо начало (5 минути)
 
-### 2) Back-end уеб услуги (REST)
-- `BikeRestService` → CRUD + search + pagination за `Bike__c`
-- `CustomerRestService` → CRUD + search + pagination за `Customer__c`
-- `RentalRestService` → CRUD + filter/search + pagination за `Bike_Rental__c`
-- Валидация на входните данни е имплементирана в `BikeShopApiUtil` и REST услугите.
-
-### 3) Защита
-- Услугите са защитени чрез стандартната Salesforce автентикация (OAuth / Session token).
-- Класовете са `with sharing`.
-- Проверява се достъпът по CRUD на ниво обект (`isAccessible`, `isCreateable`, `isUpdateable`, `isDeletable`).
-
-### 4) Open API specification (Swagger документация)
-- **OpenAPI файл**: `docs/openapi.yaml` (OpenAPI 3.0.3 спецификация)
-- **Покрива**:
-  - Всички три REST услуги (Bikes, Customers, Rentals)
-  - Всички CRUD операции (GET, POST, PATCH, DELETE)
-  - Пагинирање и търсене
-  - Валидация на входни данни
-  - Статус кодове и отговорни схеми
-  - OAuth 2.0 Bearer Token автентикация
-  - Примери за заявки и отговори
-- **Визуализирай с**: [Swagger UI](https://editor.swagger.io/) - копирай съдържанието на `docs/openapi.yaml` там
-
-### 5) Front-end
-- LWC компонент: `force-app/main/default/lwc/bikeShopApp`
-- Интерфейс с табове за Bikes, Customers и Rentals.
-- Поддържа CRUD, търсене/филтриране и странициране чрез REST API.
-
-### 6) Unit тестове (допълнителни точки)
-- Apex тестове: `BikeShopApiTest.cls`
-
-## Инсталация и стартиране
-
-### Предварителни изисквания
-- Node.js 18+
-- Salesforce CLI (`sf`)
-- Вече свързана Developer Org / Scratch Org
-- Postman (за REST API тестване)
-
-### 1. Инсталиране на npm зависимости
+### 1️⃣ Свържи се с Salesforce org
 ```bash
-cd "/Users/aleksandar.aleksandrov/Desktop/PU Bike/Salesforce-Bike-Shop"
-npm install
+sf org login web --alias "Bike Shop" --set-default
 ```
 
-### 2. Деплой в свързания org
+### 2️⃣ Деплой в org
 ```bash
-sf project deploy start --source-dir force-app
+sf project deploy start --source-dir force-app --wait 10
 ```
 
-### 3. Пускане на Apex тестовете
+### 3️⃣ Присвой разрешения
+```bash
+sf org assign permset --name Bike_Shop_App_Access
+```
+
+### 4️⃣ Импортирай Postman колекция
+1. Отвори **Postman** → **Import** → `docs/postman-collection.json`
+2. Влизе в колекцията → **Variables** → `SALESFORCE_TOKEN` = `sf org display | grep "Access Token"`
+3. **Send** на всяка заявка
+
+## 📚 REST Endpoints
+
+| Метод | Path | Описание |
+|-------|------|---------|
+| GET | `/bikeshop/v1/bikes?page=1&pageSize=10` | Вземи всички мотоциклети |
+| POST | `/bikeshop/v1/bikes` | Създай мотоциклета |
+| PATCH | `/bikeshop/v1/bikes/{id}` | Обнови мотоциклета |
+| DELETE | `/bikeshop/v1/bikes/{id}` | Изтрий мотоциклета |
+| | | |
+| GET | `/bikeshop/v1/customers?page=1&pageSize=10` | Вземи всички клиенти |
+| POST | `/bikeshop/v1/customers` | Създай клиент |
+| PATCH | `/bikeshop/v1/customers/{id}` | Обнови клиент |
+| DELETE | `/bikeshop/v1/customers/{id}` | Изтрий клиент |
+| | | |
+| GET | `/bikeshop/v1/rentals?page=1&pageSize=10` | Вземи всички наемания |
+| POST | `/bikeshop/v1/rentals` | Създай наемание |
+| PATCH | `/bikeshop/v1/rentals/{id}` | Обнови наемание |
+| DELETE | `/bikeshop/v1/rentals/{id}` | Изтрий наемание |
+
+**Full URL**: `https://stu2401322033.c9195e8f6294.develop.my.salesforce.com/services/apexrest{path}`
+
+## 📖 Документация
+
+| Файл | Как да го използваш |
+|------|-------------------|
+| `docs/openapi.yaml` | Отвори в [Swagger Editor](https://editor.swagger.io/) за интерактивен преглед |
+| `docs/postman-collection.json` | Import в Postman за директно тестване |
+| Този README | Преглед на всичко |
+
+## 🧪 Пускане на тестовете
+
 ```bash
 sf apex run test --tests BikeShopApiTest --result-format human --code-coverage
 ```
 
-### 4. Използване на UI
-1. В Salesforce Setup създай `Lightning App Page`.
-2. Добави LWC компонента `Bike Shop App`.
-3. Отвори страницата и използвай табовете за работа с данните.
+Резултат: **115/115 ✅ преминават**
 
-### 5. Преглед на OpenAPI документацията (Swagger)
-1. Отвори файла `docs/openapi.yaml` в VS Code
-2. Или го отвори в [Swagger Editor](https://editor.swagger.io/):
-   - Копирай съдържанието на `docs/openapi.yaml`
-   - Paste го в левия панел на Swagger Editor
-   - Вижда ще се генерира интерактивна документация с примери
-3. Документацията описва всички endpoints, параметри, и примери за заявки/отговори
+## 🏗️ Архитектура
 
-### 6. Тестване в Postman с готова колекция
-1. Отвори Postman
-2. **Import** → **Upload Files** → избери `docs/postman-collection.json`
-3. Collection "Bike Shop REST API" ще се импортира с 15 готови заявки
-4. Във всяка заявка сетвай переменната `{{SALESFORCE_TOKEN}}`:
-   - Отвори VS Code терминал и изпълни: `sf org display`
-   - Копирай "Access Token" стойността
-   - В Postman: **Collections** → **Variables** → `SALESFORCE_TOKEN` → paste стойността
-5. Сега можеш да изпълниш всяка заявка директно от колекцията
+### Модели (DTOs)
+```
+BikeDto        → Bike__c
+CustomerDto    → Customer__c
+RentalDto      → Bike_Rental__c (с връзки)
+```
 
----
+### Класове
+- **BikeRestService** / **CustomerRestService** / **RentalRestService** - CRUD & REST endpoints
+- **BikeShopApiUtil** - Общи функции, валидация, форматиране на отговори
+- **BikeShopLwcController** - LWC логика
+- Всички са `with sharing` + проверка на CRUD достъпа
 
-## 🆕 Ново: Деплой в нова среда + OAuth конфигурация за Postman
+### Database
+| Таблица | Колони | Връзки | Задължителни |
+|---------|--------|--------|--------------|
+| `Bike__c` | Id, Name, Model__c, Brand__c, Category__c, Daily_Rate__c, Available__c, Mileage__c, Last_Service_Date__c | - | Name, Model__c, Brand__c, Daily_Rate__c |
+| `Customer__c` | Id, Name, First_Name__c, Last_Name__c, Email__c, Phone__c, Birth_Date__c, Loyalty_Points__c, Is_Active__c | - | First_Name__c, Last_Name__c, Email__c |
+| `Bike_Rental__c` | Id, Bike__c (FK), Customer__c (FK), Start_Date__c, End_Date__c, Daily_Price__c, Total_Amount__c, Status__c, Paid__c | Bike__c, Customer__c | Bike__c, Customer__c, Start_Date__c, End_Date__c |
+
+## 🔐 Защита
+
+- ✅ OAuth 2.0 Bearer Token автентикация
+- ✅ CRUD проверки на ниво обект (`isAccessible`, `isCreateable`, `isUpdateable`, `isDeletable`)
+- ✅ Row-level security чрез `with sharing`
+- ✅ Валидация на входни данни (телефонни номера, формати на дати, и т.н.)
+
+## 💡 Примери за заявки
+
+### Получи всички мотоциклети
+```bash
+curl -X GET "https://stu2401322033.c9195e8f6294.develop.my.salesforce.com/services/apexrest/bikeshop/v1/bikes?page=1&pageSize=10" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### Създай нова мотоциклета
+```bash
+curl -X POST "https://stu2401322033.c9195e8f6294.develop.my.salesforce.com/services/apexrest/bikeshop/v1/bikes" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Mountain Bike Pro",
+    "model": "MTB-2024",
+    "brand": "Trek",
+    "category": "Mountain",
+    "dailyRate": 25.00,
+    "available": true,
+    "mileage": 0
+  }'
+```
+
+## ❓ FAQ
+
+**Q: Как да получа токена?**
+```bash
+sf org display | grep "Access Token"
+```
+
+**Q: Какво е разликата между минаване през LWC и Postman?**
+- LWC: За ежедневна работа с UI
+- Postman: За тестване на API-то директно
+
+**Q: Могу ли да използвам SOQL вместо REST API?**
+Да, но този проект е специално за REST API, затова използвай REST endpoints.
+
+**Q: Тестовете работят ли и на други orgs?**
+Да, просто деплой и присвой permission set-а.
+
+## 📞 Още информация
+
+- **OpenAPI спецификация**: `docs/openapi.yaml` (всички детайли)
+- **Тест код**: `force-app/main/default/classes/*Test.cls`
+- **LWC компонент**: `force-app/main/default/lwc/bikeShopApp/`
 
 Ако преминаваш към нова Salesforce среда и искаш да тестваш REST API през Postman с OAuth 2.0 аутентикация, следвай тази инструкция:
 

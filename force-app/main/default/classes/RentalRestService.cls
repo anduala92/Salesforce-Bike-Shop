@@ -3,7 +3,7 @@ global with sharing class RentalRestService {
     @HttpGet
     global static String getRentals() {
         try {
-            if (!Schema.sObjectType.aiops_education__Bike_Rental__c.isAccessible()) {
+            if (!Schema.sObjectType.Bike_Rental__c.isAccessible()) {
                 throw new BikeShopApiUtil.ApiException('No read access to Rental.', 403);
             }
 
@@ -12,72 +12,77 @@ global with sharing class RentalRestService {
             Integer offsetRows = (page - 1) * pageSize;
             String status = BikeShopApiUtil.getParam('status');
             String customerIdParam = BikeShopApiUtil.getParam('customerId');
-            List<aiops_education__Bike_Rental__c> rows;
+            List<Bike_Rental__c> rows;
             Integer total;
 
             if (String.isBlank(status) && String.isBlank(customerIdParam)) {
-                total = [SELECT COUNT() FROM aiops_education__Bike_Rental__c];
+                total = [SELECT COUNT() FROM Bike_Rental__c];
                 rows = [
-                    SELECT Id, Name, aiops_education__Bike__c, aiops_education__Bike__r.Name, aiops_education__Customer__c, aiops_education__Customer__r.Name, aiops_education__Start_Date__c, aiops_education__End_Date__c, aiops_education__Daily_Price__c, aiops_education__Total_Amount__c, aiops_education__Status__c, aiops_education__Paid__c
-                    FROM aiops_education__Bike_Rental__c
+                    SELECT Id, Name, Bike__c, Bike__r.Name, Customer__c, Customer__r.Name, Start_Date__c, End_Date__c, Daily_Price__c, Total_Amount__c, Status__c, Paid__c
+                    FROM Bike_Rental__c
                     ORDER BY CreatedDate DESC
                     LIMIT :pageSize
                     OFFSET :offsetRows
                 ];
             } else if (!String.isBlank(status) && !String.isBlank(customerIdParam)) {
                 Id customerId = (Id) customerIdParam;
-                total = [SELECT COUNT() FROM aiops_education__Bike_Rental__c WHERE aiops_education__Status__c = :status AND aiops_education__Customer__c = :customerId];
+                total = [SELECT COUNT() FROM Bike_Rental__c WHERE Status__c = :status AND Customer__c = :customerId];
                 rows = [
-                    SELECT Id, Name, aiops_education__Bike__c, aiops_education__Bike__r.Name, aiops_education__Customer__c, aiops_education__Customer__r.Name, aiops_education__Start_Date__c, aiops_education__End_Date__c, aiops_education__Daily_Price__c, aiops_education__Total_Amount__c, aiops_education__Status__c, aiops_education__Paid__c
-                    FROM aiops_education__Bike_Rental__c
-                    WHERE aiops_education__Status__c = :status AND aiops_education__Customer__c = :customerId
+                    SELECT Id, Name, Bike__c, Bike__r.Name, Customer__c, Customer__r.Name, Start_Date__c, End_Date__c, Daily_Price__c, Total_Amount__c, Status__c, Paid__c
+                    FROM Bike_Rental__c
+                    WHERE Status__c = :status AND Customer__c = :customerId
                     ORDER BY CreatedDate DESC
                     LIMIT :pageSize
                     OFFSET :offsetRows
                 ];
             } else if (!String.isBlank(status)) {
-                total = [SELECT COUNT() FROM aiops_education__Bike_Rental__c WHERE aiops_education__Status__c = :status];
+                total = [SELECT COUNT() FROM Bike_Rental__c WHERE Status__c = :status];
                 rows = [
-                    SELECT Id, Name, aiops_education__Bike__c, aiops_education__Bike__r.Name, aiops_education__Customer__c, aiops_education__Customer__r.Name, aiops_education__Start_Date__c, aiops_education__End_Date__c, aiops_education__Daily_Price__c, aiops_education__Total_Amount__c, aiops_education__Status__c, aiops_education__Paid__c
-                    FROM aiops_education__Bike_Rental__c
-                    WHERE aiops_education__Status__c = :status
+                    SELECT Id, Name, Bike__c, Bike__r.Name, Customer__c, Customer__r.Name, Start_Date__c, End_Date__c, Daily_Price__c, Total_Amount__c, Status__c, Paid__c
+                    FROM Bike_Rental__c
+                    WHERE Status__c = :status
                     ORDER BY CreatedDate DESC
                     LIMIT :pageSize
                     OFFSET :offsetRows
                 ];
             } else {
                 Id customerId = (Id) customerIdParam;
-                total = [SELECT COUNT() FROM aiops_education__Bike_Rental__c WHERE aiops_education__Customer__c = :customerId];
+                total = [SELECT COUNT() FROM Bike_Rental__c WHERE Customer__c = :customerId];
                 rows = [
-                    SELECT Id, Name, aiops_education__Bike__c, aiops_education__Bike__r.Name, aiops_education__Customer__c, aiops_education__Customer__r.Name, aiops_education__Start_Date__c, aiops_education__End_Date__c, aiops_education__Daily_Price__c, aiops_education__Total_Amount__c, aiops_education__Status__c, aiops_education__Paid__c
-                    FROM aiops_education__Bike_Rental__c
-                    WHERE aiops_education__Customer__c = :customerId
+                    SELECT Id, Name, Bike__c, Bike__r.Name, Customer__c, Customer__r.Name, Start_Date__c, End_Date__c, Daily_Price__c, Total_Amount__c, Status__c, Paid__c
+                    FROM Bike_Rental__c
+                    WHERE Customer__c = :customerId
                     ORDER BY CreatedDate DESC
                     LIMIT :pageSize
                     OFFSET :offsetRows
                 ];
             }
 
-            return JSON.serialize(BikeShopApiUtil.listResponse(rows, total, page, pageSize));
+            List<RentalDto> rentalDtos = new List<RentalDto>();
+            for (Bike_Rental__c rental : rows) {
+                rentalDtos.add(new RentalDto(rental));
+            }
+
+            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.listResponseWithDtos(rentalDtos, total, page, pageSize));
         } catch (Exception ex) {
-            return JSON.serialize(BikeShopApiUtil.errorResponse(ex));
+            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
         }
     }
 
     @HttpPost
     global static String createRental() {
         try {
-            if (!Schema.sObjectType.aiops_education__Bike_Rental__c.isCreateable()) {
+            if (!Schema.sObjectType.Bike_Rental__c.isCreateable()) {
                 throw new BikeShopApiUtil.ApiException('No create access to Rental.', 403);
             }
 
             Map<String, Object> body = BikeShopApiUtil.parseBody();
-            Id bikeId = BikeShopApiUtil.getId(body, 'aiops_education__Bike__c');
-            Id customerId = BikeShopApiUtil.getId(body, 'aiops_education__Customer__c');
-            Date startDate = BikeShopApiUtil.getDate(body, 'aiops_education__Start_Date__c');
-            Date endDate = BikeShopApiUtil.getDate(body, 'aiops_education__End_Date__c');
-            Decimal dailyPrice = BikeShopApiUtil.getDecimal(body, 'aiops_education__Daily_Price__c');
-            String status = BikeShopApiUtil.getString(body, 'aiops_education__Status__c');
+            Id bikeId = BikeShopApiUtil.getId(body, 'Bike__c');
+            Id customerId = BikeShopApiUtil.getId(body, 'Customer__c');
+            Date startDate = BikeShopApiUtil.getDate(body, 'Start_Date__c');
+            Date endDate = BikeShopApiUtil.getDate(body, 'End_Date__c');
+            Decimal dailyPrice = BikeShopApiUtil.getDecimal(body, 'Daily_Price__c');
+            String status = BikeShopApiUtil.getString(body, 'Status__c');
 
             if (bikeId == null) {
                 throw new BikeShopApiUtil.ApiException('Bike is required.', 400);
@@ -97,96 +102,97 @@ global with sharing class RentalRestService {
             Integer rentalDays = startDate.daysBetween(endDate) + 1;
             Decimal totalAmount = dailyPrice * rentalDays;
 
-            aiops_education__Bike_Rental__c rental = new aiops_education__Bike_Rental__c();
-            rental.aiops_education__Bike__c = bikeId;
-            rental.aiops_education__Customer__c = customerId;
-            rental.aiops_education__Start_Date__c = startDate;
-            rental.aiops_education__End_Date__c = endDate;
-            rental.aiops_education__Daily_Price__c = dailyPrice;
-            rental.aiops_education__Total_Amount__c = body.containsKey('aiops_education__Total_Amount__c') ? BikeShopApiUtil.getDecimal(body, 'aiops_education__Total_Amount__c') : totalAmount;
-            rental.aiops_education__Status__c = status;
-            rental.aiops_education__Paid__c = body.containsKey('aiops_education__Paid__c') ? BikeShopApiUtil.getBoolean(body, 'aiops_education__Paid__c') : false;
+            Bike_Rental__c rental = new Bike_Rental__c();
+            rental.Bike__c = bikeId;
+            rental.Customer__c = customerId;
+            rental.Start_Date__c = startDate;
+            rental.End_Date__c = endDate;
+            rental.Daily_Price__c = dailyPrice;
+            rental.Total_Amount__c = body.containsKey('Total_Amount__c') ? BikeShopApiUtil.getDecimal(body, 'Total_Amount__c') : totalAmount;
+            rental.Status__c = status;
+            rental.Paid__c = body.containsKey('Paid__c') ? BikeShopApiUtil.getBoolean(body, 'Paid__c') : false;
 
             insert rental;
             RestContext.response.statusCode = 201;
-            return JSON.serialize(rental);
+            rental = [SELECT Id, Bike__c, Bike__r.Name, Customer__c, Customer__r.Name, Start_Date__c, End_Date__c, Daily_Price__c, Total_Amount__c, Status__c, Paid__c FROM Bike_Rental__c WHERE Id = :rental.Id];
+            return BikeShopApiUtil.formatJsonResponse(new RentalDto(rental));
         } catch (Exception ex) {
-            return JSON.serialize(BikeShopApiUtil.errorResponse(ex));
+            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
         }
     }
 
     @HttpPatch
     global static String updateRental() {
         try {
-            if (!Schema.sObjectType.aiops_education__Bike_Rental__c.isUpdateable()) {
+            if (!Schema.sObjectType.Bike_Rental__c.isUpdateable()) {
                 throw new BikeShopApiUtil.ApiException('No update access to Rental.', 403);
             }
 
             Id rentalId = BikeShopApiUtil.getIdFromUri();
-            aiops_education__Bike_Rental__c rental = [
-                SELECT Id, aiops_education__Bike__c, aiops_education__Customer__c, aiops_education__Start_Date__c, aiops_education__End_Date__c, aiops_education__Daily_Price__c, aiops_education__Total_Amount__c, aiops_education__Status__c, aiops_education__Paid__c
-                FROM aiops_education__Bike_Rental__c
+            Bike_Rental__c rental = [
+                SELECT Id, Bike__c, Customer__c, Start_Date__c, End_Date__c, Daily_Price__c, Total_Amount__c, Status__c, Paid__c
+                FROM Bike_Rental__c
                 WHERE Id = :rentalId
                 LIMIT 1
             ];
 
             Map<String, Object> body = BikeShopApiUtil.parseBody();
-            if (body.containsKey('aiops_education__Bike__c')) {
-                rental.aiops_education__Bike__c = BikeShopApiUtil.getId(body, 'aiops_education__Bike__c');
+            if (body.containsKey('Bike__c')) {
+                rental.Bike__c = BikeShopApiUtil.getId(body, 'Bike__c');
             }
-            if (body.containsKey('aiops_education__Customer__c')) {
-                rental.aiops_education__Customer__c = BikeShopApiUtil.getId(body, 'aiops_education__Customer__c');
+            if (body.containsKey('Customer__c')) {
+                rental.Customer__c = BikeShopApiUtil.getId(body, 'Customer__c');
             }
-            if (body.containsKey('aiops_education__Start_Date__c')) {
-                rental.aiops_education__Start_Date__c = BikeShopApiUtil.getDate(body, 'aiops_education__Start_Date__c');
+            if (body.containsKey('Start_Date__c')) {
+                rental.Start_Date__c = BikeShopApiUtil.getDate(body, 'Start_Date__c');
             }
-            if (body.containsKey('aiops_education__End_Date__c')) {
-                rental.aiops_education__End_Date__c = BikeShopApiUtil.getDate(body, 'aiops_education__End_Date__c');
+            if (body.containsKey('End_Date__c')) {
+                rental.End_Date__c = BikeShopApiUtil.getDate(body, 'End_Date__c');
             }
-            if (rental.aiops_education__End_Date__c < rental.aiops_education__Start_Date__c) {
+            if (rental.End_Date__c < rental.Start_Date__c) {
                 throw new BikeShopApiUtil.ApiException('End Date cannot be before Start Date.', 400);
             }
-            if (body.containsKey('aiops_education__Daily_Price__c')) {
-                Decimal dailyPrice = BikeShopApiUtil.getDecimal(body, 'aiops_education__Daily_Price__c');
+            if (body.containsKey('Daily_Price__c')) {
+                Decimal dailyPrice = BikeShopApiUtil.getDecimal(body, 'Daily_Price__c');
                 BikeShopApiUtil.validatePositive(dailyPrice, 'Daily Price', true);
-                rental.aiops_education__Daily_Price__c = dailyPrice;
+                rental.Daily_Price__c = dailyPrice;
             }
-            if (body.containsKey('aiops_education__Status__c')) {
-                String status = BikeShopApiUtil.getString(body, 'aiops_education__Status__c');
+            if (body.containsKey('Status__c')) {
+                String status = BikeShopApiUtil.getString(body, 'Status__c');
                 BikeShopApiUtil.validateText(status, 40, 'Status', true);
-                rental.aiops_education__Status__c = status;
+                rental.Status__c = status;
             }
-            if (body.containsKey('aiops_education__Paid__c')) {
-                rental.aiops_education__Paid__c = BikeShopApiUtil.getBoolean(body, 'aiops_education__Paid__c');
+            if (body.containsKey('Paid__c')) {
+                rental.Paid__c = BikeShopApiUtil.getBoolean(body, 'Paid__c');
             }
 
-            Integer rentalDays = rental.aiops_education__Start_Date__c.daysBetween(rental.aiops_education__End_Date__c) + 1;
-            rental.aiops_education__Total_Amount__c = rental.aiops_education__Daily_Price__c * rentalDays;
+            Integer rentalDays = rental.Start_Date__c.daysBetween(rental.End_Date__c) + 1;
+            rental.Total_Amount__c = rental.Daily_Price__c * rentalDays;
 
             update rental;
-            return JSON.serialize(rental);
+            rental = [SELECT Id, Bike__c, Bike__r.Name, Customer__c, Customer__r.Name, Start_Date__c, End_Date__c, Daily_Price__c, Total_Amount__c, Status__c, Paid__c FROM Bike_Rental__c WHERE Id = :rental.Id];
+            return BikeShopApiUtil.formatJsonResponse(new RentalDto(rental));
         } catch (QueryException qex) {
-            return JSON.serialize(BikeShopApiUtil.errorResponse(new BikeShopApiUtil.ApiException('Rental not found.', 404)));
+            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(new BikeShopApiUtil.ApiException('Rental not found.', 404)));
         } catch (Exception ex) {
-            return JSON.serialize(BikeShopApiUtil.errorResponse(ex));
+            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
         }
     }
 
     @HttpDelete
-    global static String deleteRental() {
+    global static void deleteRental() {
         try {
-            if (!Schema.sObjectType.aiops_education__Bike_Rental__c.isDeletable()) {
+            if (!Schema.sObjectType.Bike_Rental__c.isDeletable()) {
                 throw new BikeShopApiUtil.ApiException('No delete access to Rental.', 403);
             }
 
             Id rentalId = BikeShopApiUtil.getIdFromUri();
-            delete [SELECT Id FROM aiops_education__Bike_Rental__c WHERE Id = :rentalId LIMIT 1];
+            delete [SELECT Id FROM Bike_Rental__c WHERE Id = :rentalId LIMIT 1];
             RestContext.response.statusCode = 204;
-            return null;
         } catch (QueryException qex) {
-            return JSON.serialize(BikeShopApiUtil.errorResponse(new BikeShopApiUtil.ApiException('Rental not found.', 404)));
+            RestContext.response.responseBody = Blob.valueOf(JSON.serialize(BikeShopApiUtil.errorResponse(new BikeShopApiUtil.ApiException('Rental not found.', 404))));
         } catch (Exception ex) {
-            return JSON.serialize(BikeShopApiUtil.errorResponse(ex));
+            RestContext.response.responseBody = Blob.valueOf(JSON.serialize(BikeShopApiUtil.errorResponse(ex)));
         }
     }
 }

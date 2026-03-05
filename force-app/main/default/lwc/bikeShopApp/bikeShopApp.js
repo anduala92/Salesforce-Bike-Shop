@@ -7,12 +7,14 @@ import getCustomers from '@salesforce/apex/BikeShopLwcController.getCustomers';
 import saveCustomerRecord from '@salesforce/apex/BikeShopLwcController.saveCustomer';
 import deleteCustomerRecord from '@salesforce/apex/BikeShopLwcController.deleteCustomer';
 import getRentals from '@salesforce/apex/BikeShopLwcController.getRentals';
+import searchRentals from '@salesforce/apex/BikeShopLwcController.searchRentals';
 import saveRentalRecord from '@salesforce/apex/BikeShopLwcController.saveRental';
 import deleteRentalRecord from '@salesforce/apex/BikeShopLwcController.deleteRental';
 import getBikeOptions from '@salesforce/apex/BikeShopLwcController.getBikeOptions';
 import getCustomerOptions from '@salesforce/apex/BikeShopLwcController.getCustomerOptions';
 import getStatusOptions from '@salesforce/apex/BikeShopLwcController.getStatusOptions';
 import checkBikeAvailability from '@salesforce/apex/BikeShopLwcController.checkBikeAvailability';
+import getBikeCategoryOptions from '@salesforce/apex/BikeShopLwcController.getBikeCategoryOptions';
 
 const PAGE_SIZE = 5;
 
@@ -25,6 +27,7 @@ export default class BikeShopApp extends LightningElement {
         const today = new Date();
         this.todayDate = today.toISOString().split('T')[0];
         this.loadRentalOptions();
+        this.loadBikeCategoryOptions();
     }
 
     /**
@@ -63,18 +66,18 @@ export default class BikeShopApp extends LightningElement {
     bikeColumns = [
         { label: 'Id', fieldName: 'Id' },
         { label: 'Model - Brand', fieldName: 'bikeDisplayName' },
-        { label: 'Category', fieldName: 'aiops_education__Category__c' },
-        { label: 'Rate', fieldName: 'aiops_education__Daily_Rate__c', type: 'currency' },
-        { label: 'Available', fieldName: 'aiops_education__Available__c', type: 'boolean' }
+        { label: 'Category', fieldName: 'Category__c' },
+        { label: 'Rate', fieldName: 'Daily_Rate__c', type: 'currency' },
+        { label: 'Available', fieldName: 'Available__c', type: 'boolean' }
     ];
 
     customerColumns = [
         { label: 'Id', fieldName: 'Id' },
         { label: 'Name', fieldName: 'Name' },
-        { label: 'First Name', fieldName: 'aiops_education__First_Name__c' },
-        { label: 'Last Name', fieldName: 'aiops_education__Last_Name__c' },
-        { label: 'Email', fieldName: 'aiops_education__Email__c' },
-        { label: 'Active', fieldName: 'aiops_education__Is_Active__c', type: 'boolean' }
+        { label: 'First Name', fieldName: 'First_Name__c' },
+        { label: 'Last Name', fieldName: 'Last_Name__c' },
+        { label: 'Email', fieldName: 'Email__c' },
+        { label: 'Active', fieldName: 'Is_Active__c', type: 'boolean' }
     ];
 
     rentalColumns = [
@@ -82,10 +85,10 @@ export default class BikeShopApp extends LightningElement {
         { label: 'Number', fieldName: 'Name' },
         { label: 'Bike', fieldName: 'BikeName' },
         { label: 'Customer', fieldName: 'CustomerName' },
-        { label: 'Start', fieldName: 'aiops_education__Start_Date__c', type: 'date' },
-        { label: 'End', fieldName: 'aiops_education__End_Date__c', type: 'date' },
-        { label: 'Status', fieldName: 'aiops_education__Status__c' },
-        { label: 'Total', fieldName: 'aiops_education__Total_Amount__c', type: 'currency' }
+        { label: 'Start', fieldName: 'Start_Date__c', type: 'date' },
+        { label: 'End', fieldName: 'End_Date__c', type: 'date' },
+        { label: 'Status', fieldName: 'Status__c' },
+        { label: 'Total', fieldName: 'Total_Amount__c', type: 'currency' }
     ];
 
     bikes = [];
@@ -94,6 +97,7 @@ export default class BikeShopApp extends LightningElement {
 
     bikeSearch = '';
     customerSearch = '';
+    rentalSearch = '';
     rentalStatusFilter = '';
 
     bikeSelectedId;
@@ -109,18 +113,20 @@ export default class BikeShopApp extends LightningElement {
     rentalPage = 1;
     rentalTotal = 0;
 
-    bikeForm = { 'aiops_education__Available__c': true };
-    customerForm = { 'aiops_education__Is_Active__c': true };
-    rentalForm = { 'aiops_education__Paid__c': false, 'aiops_education__Status__c': 'Draft' };
+    bikeForm = { 'Available__c': true };
+    customerForm = { 'Is_Active__c': true };
+    rentalForm = { 'Paid__c': false, 'Status__c': 'Draft' };
 
     bikeOptions = [];
+    bikeCategoryOptions = [];
     customerOptions = [];
     statusOptions = [];
+    statusFilterOptions = [];
     rentalTotalDays = 0;
 
     get bikeName() {
-        const model = this.bikeForm.aiops_education__Model__c || '';
-        const brand = this.bikeForm.aiops_education__Brand__c || '';
+        const model = this.bikeForm.Model__c || '';
+        const brand = this.bikeForm.Brand__c || '';
         if (model && brand) {
             return `${brand} - ${model}`;
         }
@@ -128,7 +134,7 @@ export default class BikeShopApp extends LightningElement {
     }
 
     get rentalTotalAmount() {
-        const dailyPrice = Number(this.rentalForm.aiops_education__Daily_Price__c) || 0;
+        const dailyPrice = Number(this.rentalForm.Daily_Price__c) || 0;
         if (this.rentalTotalDays > 0 && dailyPrice > 0) {
             return (this.rentalTotalDays * dailyPrice).toFixed(2);
         }
@@ -158,8 +164,8 @@ export default class BikeShopApp extends LightningElement {
         if (data) {
             this.bikes = (data.records || []).map((record) => ({
                 ...record,
-                bikeDisplayName: record.aiops_education__Brand__c && record.aiops_education__Model__c 
-                    ? `${record.aiops_education__Brand__c} - ${record.aiops_education__Model__c}` 
+                bikeDisplayName: record.Brand__c && record.Model__c 
+                    ? `${record.Brand__c} - ${record.Model__c}` 
                     : record.Name
             }));
             this.bikeTotal = data.total || 0;
@@ -182,7 +188,7 @@ export default class BikeShopApp extends LightningElement {
         }
     }
 
-    @wire(getRentals, { pageNumber: '$rentalPage', pageSize: '$pageSize', status: '$rentalStatusFilter' })
+    @wire(searchRentals, { pageNumber: '$rentalPage', pageSize: '$pageSize', searchText: '$rentalSearch', status: '$rentalStatusFilter' })
     wiredRentals(result) {
         this.wiredRentalsResult = result;
         const { data, error } = result;
@@ -193,21 +199,21 @@ export default class BikeShopApp extends LightningElement {
                 // Трябва да парсирам като UTC и преобразувам към браузърния timezone
                 const transformedRecord = {
                     ...record,
-                    BikeName: record.aiops_education__Bike__r ? record.aiops_education__Bike__r.Name : '',
-                    CustomerName: record.aiops_education__Customer__r ? record.aiops_education__Customer__r.Name : '',
+                    BikeName: record.Bike__r ? record.Bike__r.Name : '',
+                    CustomerName: record.Customer__r ? record.Customer__r.Name : '',
                     // Преобразува UTC датите към браузърния timezone за показване
-                    aiops_education__Start_Date__c: record.aiops_education__Start_Date__c 
-                        ? this.convertUTCToLocalDate(record.aiops_education__Start_Date__c)
+                    Start_Date__c: record.Start_Date__c 
+                        ? this.convertUTCToLocalDate(record.Start_Date__c)
                         : null,
-                    aiops_education__End_Date__c: record.aiops_education__End_Date__c 
-                        ? this.convertUTCToLocalDate(record.aiops_education__End_Date__c)
+                    End_Date__c: record.End_Date__c 
+                        ? this.convertUTCToLocalDate(record.End_Date__c)
                         : null
                 };
                 console.log('Read rental dates:', {
-                    received_start: record.aiops_education__Start_Date__c,
-                    converted_start: transformedRecord.aiops_education__Start_Date__c,
-                    received_end: record.aiops_education__End_Date__c,
-                    converted_end: transformedRecord.aiops_education__End_Date__c
+                    received_start: record.Start_Date__c,
+                    converted_start: transformedRecord.Start_Date__c,
+                    received_end: record.End_Date__c,
+                    converted_end: transformedRecord.End_Date__c
                 });
                 return transformedRecord;
             });
@@ -226,10 +232,17 @@ export default class BikeShopApp extends LightningElement {
         } else if (key === 'customer') {
             this.customerSearch = event.target.value;
             this.customerPage = 1;
-        } else {
-            this.rentalStatusFilter = event.target.value;
-            this.rentalPage = 1;
         }
+    }
+
+    handleStatusFilterChange(event) {
+        this.rentalStatusFilter = event.detail.value;
+        this.rentalPage = 1;
+    }
+
+    handleRentalSearchChange(event) {
+        this.rentalSearch = event.target.value;
+        this.rentalPage = 1;
     }
 
     handleFormInput(event) {
@@ -239,7 +252,7 @@ export default class BikeShopApp extends LightningElement {
         this.updateForm(entity, field, value);
         
         // Trigger rental summary update for date changes
-        if (entity === 'rental' && (field === 'aiops_education__Start_Date__c' || field === 'aiops_education__End_Date__c')) {
+        if (entity === 'rental' && (field === 'Start_Date__c' || field === 'End_Date__c')) {
             this.updateRentalSummary();
         }
     }
@@ -273,18 +286,18 @@ export default class BikeShopApp extends LightningElement {
         this.clearEntityValidation('bike');
         let valid = true;
 
-        const model = (this.bikeForm.aiops_education__Model__c || '').trim();
-        const brand = (this.bikeForm.aiops_education__Brand__c || '').trim();
-        const category = (this.bikeForm.aiops_education__Category__c || '').trim();
-        const dailyRateRaw = this.bikeForm.aiops_education__Daily_Rate__c;
+        const model = (this.bikeForm.Model__c || '').trim();
+        const brand = (this.bikeForm.Brand__c || '').trim();
+        const category = (this.bikeForm.Category__c || '').trim();
+        const dailyRateRaw = this.bikeForm.Daily_Rate__c;
         const dailyRate = Number(dailyRateRaw);
-        const lastServiceDate = this.bikeForm.aiops_education__Last_Service_Date__c;
+        const lastServiceDate = this.bikeForm.Last_Service_Date__c;
 
-        const modelInput = this.template.querySelector('lightning-input[data-entity="bike"][data-field="aiops_education__Model__c"]');
-        const brandInput = this.template.querySelector('lightning-input[data-entity="bike"][data-field="aiops_education__Brand__c"]');
-        const categoryInput = this.template.querySelector('lightning-input[data-entity="bike"][data-field="aiops_education__Category__c"]');
-        const rateInput = this.template.querySelector('lightning-input[data-entity="bike"][data-field="aiops_education__Daily_Rate__c"]');
-        const lastServiceInput = this.template.querySelector('lightning-input[data-entity="bike"][data-field="aiops_education__Last_Service_Date__c"]');
+        const modelInput = this.template.querySelector('lightning-input[data-entity="bike"][data-field="Model__c"]');
+        const brandInput = this.template.querySelector('lightning-input[data-entity="bike"][data-field="Brand__c"]');
+        const categoryInput = this.template.querySelector('lightning-input[data-entity="bike"][data-field="Category__c"]');
+        const rateInput = this.template.querySelector('lightning-input[data-entity="bike"][data-field="Daily_Rate__c"]');
+        const lastServiceInput = this.template.querySelector('lightning-input[data-entity="bike"][data-field="Last_Service_Date__c"]');
 
         if (!model && modelInput) {
             modelInput.setCustomValidity('Model is required.');
@@ -326,14 +339,17 @@ export default class BikeShopApp extends LightningElement {
         this.clearEntityValidation('customer');
         let valid = true;
 
-        const firstName = (this.customerForm.aiops_education__First_Name__c || '').trim();
-        const lastName = (this.customerForm.aiops_education__Last_Name__c || '').trim();
-        const email = (this.customerForm.aiops_education__Email__c || '').trim();
+        const firstName = (this.customerForm.First_Name__c || '').trim();
+        const lastName = (this.customerForm.Last_Name__c || '').trim();
+        const email = (this.customerForm.Email__c || '').trim();
+        const phone = (this.customerForm.Phone__c || '').trim();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^[\+]?[0-9]{10,15}$/;
 
-        const firstNameInput = this.template.querySelector('lightning-input[data-entity="customer"][data-field="aiops_education__First_Name__c"]');
-        const lastNameInput = this.template.querySelector('lightning-input[data-entity="customer"][data-field="aiops_education__Last_Name__c"]');
-        const emailInput = this.template.querySelector('lightning-input[data-entity="customer"][data-field="aiops_education__Email__c"]');
+        const firstNameInput = this.template.querySelector('lightning-input[data-entity="customer"][data-field="First_Name__c"]');
+        const lastNameInput = this.template.querySelector('lightning-input[data-entity="customer"][data-field="Last_Name__c"]');
+        const emailInput = this.template.querySelector('lightning-input[data-entity="customer"][data-field="Email__c"]');
+        const phoneInput = this.template.querySelector('lightning-input[data-entity="customer"][data-field="Phone__c"]');
 
         if (!firstName && firstNameInput) {
             firstNameInput.setCustomValidity('First Name is required.');
@@ -354,6 +370,12 @@ export default class BikeShopApp extends LightningElement {
             emailInput.reportValidity();
             valid = false;
         }
+        
+        if (phone && !phoneRegex.test(phone) && phoneInput) {
+            phoneInput.setCustomValidity('Phone must be 10-15 digits, optionally starting with +');
+            phoneInput.reportValidity();
+            valid = false;
+        }
 
         if (!valid) {
             this.errorMessage = 'Please fill all required Customer fields correctly.';
@@ -365,20 +387,20 @@ export default class BikeShopApp extends LightningElement {
         this.clearEntityValidation('rental');
         let valid = true;
 
-        const bikeId = (this.rentalForm.aiops_education__Bike__c || '').trim();
-        const customerId = (this.rentalForm.aiops_education__Customer__c || '').trim();
-        const startDate = this.rentalForm.aiops_education__Start_Date__c;
-        const endDate = this.rentalForm.aiops_education__End_Date__c;
-        const dailyPriceRaw = this.rentalForm.aiops_education__Daily_Price__c;
+        const bikeId = (this.rentalForm.Bike__c || '').trim();
+        const customerId = (this.rentalForm.Customer__c || '').trim();
+        const startDate = this.rentalForm.Start_Date__c;
+        const endDate = this.rentalForm.End_Date__c;
+        const dailyPriceRaw = this.rentalForm.Daily_Price__c;
         const dailyPrice = Number(dailyPriceRaw);
-        const status = (this.rentalForm.aiops_education__Status__c || '').trim();
+        const status = (this.rentalForm.Status__c || '').trim();
 
-        const bikeIdInput = this.template.querySelector('lightning-input[data-entity="rental"][data-field="aiops_education__Bike__c"]');
-        const customerIdInput = this.template.querySelector('lightning-input[data-entity="rental"][data-field="aiops_education__Customer__c"]');
-        const startDateInput = this.template.querySelector('lightning-input[data-entity="rental"][data-field="aiops_education__Start_Date__c"]');
-        const endDateInput = this.template.querySelector('lightning-input[data-entity="rental"][data-field="aiops_education__End_Date__c"]');
-        const dailyPriceInput = this.template.querySelector('lightning-input[data-entity="rental"][data-field="aiops_education__Daily_Price__c"]');
-        const statusInput = this.template.querySelector('lightning-input[data-entity="rental"][data-field="aiops_education__Status__c"]');
+        const bikeIdInput = this.template.querySelector('lightning-input[data-entity="rental"][data-field="Bike__c"]');
+        const customerIdInput = this.template.querySelector('lightning-input[data-entity="rental"][data-field="Customer__c"]');
+        const startDateInput = this.template.querySelector('lightning-input[data-entity="rental"][data-field="Start_Date__c"]');
+        const endDateInput = this.template.querySelector('lightning-input[data-entity="rental"][data-field="End_Date__c"]');
+        const dailyPriceInput = this.template.querySelector('lightning-input[data-entity="rental"][data-field="Daily_Price__c"]');
+        const statusInput = this.template.querySelector('lightning-input[data-entity="rental"][data-field="Status__c"]');
 
         if (!bikeId && bikeIdInput) {
             bikeIdInput.setCustomValidity('Bike is required.');
@@ -435,9 +457,9 @@ export default class BikeShopApp extends LightningElement {
     }
 
     async validateRentalAvailability() {
-        const bikeId = this.rentalForm.aiops_education__Bike__c;
-        const startDate = this.rentalForm.aiops_education__Start_Date__c;
-        const endDate = this.rentalForm.aiops_education__End_Date__c;
+        const bikeId = this.rentalForm.Bike__c;
+        const startDate = this.rentalForm.Start_Date__c;
+        const endDate = this.rentalForm.End_Date__c;
         const rentalId = this.rentalForm.Id;
         
         if (!bikeId || !startDate || !endDate) {
@@ -459,7 +481,7 @@ export default class BikeShopApp extends LightningElement {
                     errorMsg += `- Rental ${conflict.rentalName} (${conflict.customerName}): ${conflict.startDate} to ${conflict.endDate}\n`;
                 });
                 
-                const startDateInput = this.template.querySelector('lightning-input[data-entity="rental"][data-field="aiops_education__Start_Date__c"]');
+                const startDateInput = this.template.querySelector('lightning-input[data-entity="rental"][data-field="Start_Date__c"]');
                 if (startDateInput) {
                     startDateInput.setCustomValidity(errorMsg);
                     startDateInput.reportValidity();
@@ -523,7 +545,7 @@ export default class BikeShopApp extends LightningElement {
     }
 
     resetBikeForm() {
-        this.bikeForm = { 'aiops_education__Available__c': true, Name: null };
+        this.bikeForm = { 'Available__c': true, Name: null };
         this.bikeSelectedIds = [];
     }
 
@@ -578,7 +600,7 @@ export default class BikeShopApp extends LightningElement {
     }
 
     resetCustomerForm() {
-        this.customerForm = { 'aiops_education__Is_Active__c': true };
+        this.customerForm = { 'Is_Active__c': true };
         this.customerSelectedIds = [];
     }
 
@@ -601,9 +623,27 @@ export default class BikeShopApp extends LightningElement {
             this.bikeOptions = bikes || [];
             this.customerOptions = customers || [];
             this.statusOptions = (statuses || []).map(status => ({ label: status, value: status }));
+            
+            // Create filter options with empty option at the top
+            this.statusFilterOptions = [
+                { label: 'All Statuses', value: '' },
+                ...this.statusOptions
+            ];
         } catch (error) {
             console.error('Error loading rental options:', error);
             this.errorMessage = 'Error loading rental options: ' + (error.body?.message || error.message);
+        }
+    }
+
+    async loadBikeCategoryOptions() {
+        try {
+            const categories = await getBikeCategoryOptions();
+            this.bikeCategoryOptions = (categories || []).map(category => ({ 
+                label: category, 
+                value: category 
+            }));
+        } catch (error) {
+            console.error('Error loading bike category options:', error);
         }
     }
 
@@ -622,8 +662,8 @@ export default class BikeShopApp extends LightningElement {
         if (selectedBike) {
             this.rentalForm = { 
                 ...this.rentalForm, 
-                aiops_education__Bike__c: selectedBikeId,
-                aiops_education__Daily_Price__c: Number(selectedBike.dailyRate)
+                Bike__c: selectedBikeId,
+                Daily_Price__c: Number(selectedBike.dailyRate)
             };
             this.updateRentalSummary();
         }
@@ -633,7 +673,7 @@ export default class BikeShopApp extends LightningElement {
         const selectedCustomerId = event.detail.value;
         this.rentalForm = { 
             ...this.rentalForm, 
-            aiops_education__Customer__c: selectedCustomerId
+            Customer__c: selectedCustomerId
         };
     }
 
@@ -641,15 +681,15 @@ export default class BikeShopApp extends LightningElement {
         const selectedStatus = event.detail.value;
         this.rentalForm = { 
             ...this.rentalForm, 
-            aiops_education__Status__c: selectedStatus
+            Status__c: selectedStatus
         };
         this.updateRentalSummary();
     }
 
     updateRentalSummary() {
-        const startDate = this.rentalForm.aiops_education__Start_Date__c;
-        const endDate = this.rentalForm.aiops_education__End_Date__c;
-        const dailyPrice = Number(this.rentalForm.aiops_education__Daily_Price__c) || 0;
+        const startDate = this.rentalForm.Start_Date__c;
+        const endDate = this.rentalForm.End_Date__c;
+        const dailyPrice = Number(this.rentalForm.Daily_Price__c) || 0;
 
         if (startDate && endDate && dailyPrice > 0) {
             // Преобразуване на дати без timezone конверсии
@@ -685,20 +725,20 @@ export default class BikeShopApp extends LightningElement {
             const payload = { ...this.rentalForm };
             delete payload.BikeName;
             delete payload.CustomerName;
-            delete payload.aiops_education__Bike__r;
-            delete payload.aiops_education__Customer__r;
-            payload.aiops_education__Total_Amount__c = Number(this.rentalTotalAmount);
+            delete payload.Bike__r;
+            delete payload.Customer__r;
+            payload.Total_Amount__c = Number(this.rentalTotalAmount);
             
             // НЕ конвертирай датите - пращай точно което user избра
             // Input field дава YYYY-MM-DD което user вижда
             // Salesforce ще го парсира като YYYY-MM-DD без timezone смяна
-            if (payload.aiops_education__Start_Date__c) {
-                payload.aiops_education__Start_Date__c = String(payload.aiops_education__Start_Date__c);
-                console.log('Saving Start Date as-is:', payload.aiops_education__Start_Date__c);
+            if (payload.Start_Date__c) {
+                payload.Start_Date__c = String(payload.Start_Date__c);
+                console.log('Saving Start Date as-is:', payload.Start_Date__c);
             }
-            if (payload.aiops_education__End_Date__c) {
-                payload.aiops_education__End_Date__c = String(payload.aiops_education__End_Date__c);
-                console.log('Saving End Date as-is:', payload.aiops_education__End_Date__c);
+            if (payload.End_Date__c) {
+                payload.End_Date__c = String(payload.End_Date__c);
+                console.log('Saving End Date as-is:', payload.End_Date__c);
             }
             
             await saveRentalRecord({ payload });
@@ -727,7 +767,7 @@ export default class BikeShopApp extends LightningElement {
     }
 
     resetRentalForm() {
-        this.rentalForm = { 'aiops_education__Paid__c': false, 'aiops_education__Status__c': 'Draft' };
+        this.rentalForm = { 'Paid__c': false, 'Status__c': 'Draft' };
         this.rentalSelectedId = null;
         this.rentalSelectedIds = [];
         this.rentalTotalDays = 0;

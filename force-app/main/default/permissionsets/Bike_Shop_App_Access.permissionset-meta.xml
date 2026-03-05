@@ -3,6 +3,10 @@
     <description>Access to Bike Shop app and tab.</description>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Bike Shop App Access</label>
+    <userPermissions>
+        <enabled>true</enabled>
+        <name>ApiEnabled</name>
+    </userPermissions>
     <applicationVisibilities>
         <application>Bike_Shop_Application</application>
         <visible>true</visible>
@@ -29,7 +33,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
-        <object>aiops_education__Bike__c</object>
+        <object>Bike__c</object>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -38,7 +42,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
-        <object>aiops_education__Customer__c</object>
+        <object>Customer__c</object>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
@@ -47,7 +51,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
-        <object>aiops_education__Bike_Rental__c</object>
+        <object>Bike_Rental__c</object>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
 </PermissionSet>

@@ -3,7 +3,7 @@ global with sharing class CustomerRestService {
     @HttpGet
     global static String getCustomers() {
         try {
-            if (!Schema.sObjectType.aiops_education__Customer__c.isAccessible()) {
+            if (!Schema.sObjectType.Customer__c.isAccessible()) {
                 throw new BikeShopApiUtil.ApiException('No read access to Customer.', 403);
             }
 
@@ -11,14 +11,14 @@ global with sharing class CustomerRestService {
             Integer pageSize = BikeShopApiUtil.getPageSize();
             Integer offsetRows = (page - 1) * pageSize;
             String search = BikeShopApiUtil.getParam('search');
-            List<aiops_education__Customer__c> rows;
+            List<Customer__c> rows;
             Integer total;
 
             if (String.isBlank(search)) {
-                total = [SELECT COUNT() FROM aiops_education__Customer__c];
+                total = [SELECT COUNT() FROM Customer__c];
                 rows = [
-                    SELECT Id, Name, aiops_education__First_Name__c, aiops_education__Last_Name__c, aiops_education__Email__c, aiops_education__Phone__c, aiops_education__Birth_Date__c, aiops_education__Loyalty_Points__c, aiops_education__Is_Active__c
-                    FROM aiops_education__Customer__c
+                    SELECT Id, Name, First_Name__c, Last_Name__c, Email__c, Phone__c, Birth_Date__c, Loyalty_Points__c, Is_Active__c
+                    FROM Customer__c
                     ORDER BY CreatedDate DESC
                     LIMIT :pageSize
                     OFFSET :offsetRows
@@ -27,101 +27,106 @@ global with sharing class CustomerRestService {
                 String likeSearch = '%' + search + '%';
                 total = [
                     SELECT COUNT()
-                    FROM aiops_education__Customer__c
-                    WHERE aiops_education__First_Name__c LIKE :likeSearch OR aiops_education__Last_Name__c LIKE :likeSearch OR aiops_education__Email__c LIKE :likeSearch
+                    FROM Customer__c
+                    WHERE First_Name__c LIKE :likeSearch OR Last_Name__c LIKE :likeSearch OR Email__c LIKE :likeSearch
                 ];
                 rows = [
-                    SELECT Id, Name, aiops_education__First_Name__c, aiops_education__Last_Name__c, aiops_education__Email__c, aiops_education__Phone__c, aiops_education__Birth_Date__c, aiops_education__Loyalty_Points__c, aiops_education__Is_Active__c
-                    FROM aiops_education__Customer__c
-                    WHERE aiops_education__First_Name__c LIKE :likeSearch OR aiops_education__Last_Name__c LIKE :likeSearch OR aiops_education__Email__c LIKE :likeSearch
+                    SELECT Id, Name, First_Name__c, Last_Name__c, Email__c, Phone__c, Birth_Date__c, Loyalty_Points__c, Is_Active__c
+                    FROM Customer__c
+                    WHERE First_Name__c LIKE :likeSearch OR Last_Name__c LIKE :likeSearch OR Email__c LIKE :likeSearch
                     ORDER BY CreatedDate DESC
                     LIMIT :pageSize
                     OFFSET :offsetRows
                 ];
             }
 
-            return JSON.serialize(BikeShopApiUtil.listResponse(rows, total, page, pageSize));
+            List<CustomerDto> customerDtos = new List<CustomerDto>();
+            for (Customer__c customer : rows) {
+                customerDtos.add(new CustomerDto(customer));
+            }
+
+            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.listResponseWithDtos(customerDtos, total, page, pageSize));
         } catch (Exception ex) {
-            return JSON.serialize(BikeShopApiUtil.errorResponse(ex));
+            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
         }
     }
 
     @HttpPost
     global static String createCustomer() {
         try {
-            if (!Schema.sObjectType.aiops_education__Customer__c.isCreateable()) {
+            if (!Schema.sObjectType.Customer__c.isCreateable()) {
                 throw new BikeShopApiUtil.ApiException('No create access to Customer.', 403);
             }
 
             Map<String, Object> body = BikeShopApiUtil.parseBody();
-            String firstName = BikeShopApiUtil.getString(body, 'aiops_education__First_Name__c');
-            String lastName = BikeShopApiUtil.getString(body, 'aiops_education__Last_Name__c');
-            String email = BikeShopApiUtil.getString(body, 'aiops_education__Email__c');
+            String firstName = BikeShopApiUtil.getString(body, 'First_Name__c');
+            String lastName = BikeShopApiUtil.getString(body, 'Last_Name__c');
+            String email = BikeShopApiUtil.getString(body, 'Email__c');
 
             BikeShopApiUtil.validateText(firstName, 50, 'First Name', true);
             BikeShopApiUtil.validateText(lastName, 50, 'Last Name', true);
             BikeShopApiUtil.validateText(email, 80, 'Email', true);
 
-            aiops_education__Customer__c customer = new aiops_education__Customer__c();
+            Customer__c customer = new Customer__c();
             customer.Name = String.isBlank(BikeShopApiUtil.getString(body, 'Name')) ? (firstName + ' ' + lastName) : BikeShopApiUtil.getString(body, 'Name');
-            customer.aiops_education__First_Name__c = firstName;
-            customer.aiops_education__Last_Name__c = lastName;
-            customer.aiops_education__Email__c = email;
-            customer.aiops_education__Phone__c = BikeShopApiUtil.getString(body, 'aiops_education__Phone__c');
-            customer.aiops_education__Birth_Date__c = BikeShopApiUtil.getDate(body, 'aiops_education__Birth_Date__c');
-            customer.aiops_education__Loyalty_Points__c = BikeShopApiUtil.getInteger(body, 'aiops_education__Loyalty_Points__c');
-            customer.aiops_education__Is_Active__c = body.containsKey('aiops_education__Is_Active__c') ? BikeShopApiUtil.getBoolean(body, 'aiops_education__Is_Active__c') : true;
+            customer.First_Name__c = firstName;
+            customer.Last_Name__c = lastName;
+            customer.Email__c = email;
+            customer.Phone__c = BikeShopApiUtil.getString(body, 'Phone__c');
+            customer.Birth_Date__c = BikeShopApiUtil.getDate(body, 'Birth_Date__c');
+            customer.Loyalty_Points__c = BikeShopApiUtil.getInteger(body, 'Loyalty_Points__c');
+            customer.Is_Active__c = body.containsKey('Is_Active__c') ? BikeShopApiUtil.getBoolean(body, 'Is_Active__c') : true;
 
             insert customer;
             RestContext.response.statusCode = 201;
-            return JSON.serialize(customer);
+            return BikeShopApiUtil.formatJsonResponse(new CustomerDto(customer));
         } catch (Exception ex) {
-            return JSON.serialize(BikeShopApiUtil.errorResponse(ex));
+            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
         }
     }
 
     @HttpPatch
     global static String updateCustomer() {
         try {
-            if (!Schema.sObjectType.aiops_education__Customer__c.isUpdateable()) {
+            if (!Schema.sObjectType.Customer__c.isUpdateable()) {
                 throw new BikeShopApiUtil.ApiException('No update access to Customer.', 403);
             }
 
             Id customerId = BikeShopApiUtil.getIdFromUri();
-            aiops_education__Customer__c customer = [
-                SELECT Id, Name, aiops_education__First_Name__c, aiops_education__Last_Name__c, aiops_education__Email__c, aiops_education__Phone__c, aiops_education__Birth_Date__c, aiops_education__Loyalty_Points__c, aiops_education__Is_Active__c
-                FROM aiops_education__Customer__c
+            Customer__c customer = [
+                SELECT Id, Name, First_Name__c, Last_Name__c, Email__c, Phone__c, Birth_Date__c, Loyalty_Points__c, Is_Active__c
+                FROM Customer__c
                 WHERE Id = :customerId
                 LIMIT 1
             ];
 
             Map<String, Object> body = BikeShopApiUtil.parseBody();
-            if (body.containsKey('aiops_education__First_Name__c')) {
-                String firstName = BikeShopApiUtil.getString(body, 'aiops_education__First_Name__c');
+            if (body.containsKey('First_Name__c')) {
+                String firstName = BikeShopApiUtil.getString(body, 'First_Name__c');
                 BikeShopApiUtil.validateText(firstName, 50, 'First Name', true);
-                customer.aiops_education__First_Name__c = firstName;
+                customer.First_Name__c = firstName;
             }
-            if (body.containsKey('aiops_education__Last_Name__c')) {
-                String lastName = BikeShopApiUtil.getString(body, 'aiops_education__Last_Name__c');
+            if (body.containsKey('Last_Name__c')) {
+                String lastName = BikeShopApiUtil.getString(body, 'Last_Name__c');
                 BikeShopApiUtil.validateText(lastName, 50, 'Last Name', true);
-                customer.aiops_education__Last_Name__c = lastName;
+                customer.Last_Name__c = lastName;
             }
-            if (body.containsKey('aiops_education__Email__c')) {
-                String email = BikeShopApiUtil.getString(body, 'aiops_education__Email__c');
+            if (body.containsKey('Email__c')) {
+                String email = BikeShopApiUtil.getString(body, 'Email__c');
                 BikeShopApiUtil.validateText(email, 80, 'Email', true);
-                customer.aiops_education__Email__c = email;
+                customer.Email__c = email;
             }
-            if (body.containsKey('aiops_education__Phone__c')) {
-                customer.aiops_education__Phone__c = BikeShopApiUtil.getString(body, 'aiops_education__Phone__c');
+            if (body.containsKey('Phone__c')) {
+                customer.Phone__c = BikeShopApiUtil.getString(body, 'Phone__c');
             }
-            if (body.containsKey('aiops_education__Birth_Date__c')) {
-                customer.aiops_education__Birth_Date__c = BikeShopApiUtil.getDate(body, 'aiops_education__Birth_Date__c');
+            if (body.containsKey('Birth_Date__c')) {
+                customer.Birth_Date__c = BikeShopApiUtil.getDate(body, 'Birth_Date__c');
             }
-            if (body.containsKey('aiops_education__Loyalty_Points__c')) {
-                customer.aiops_education__Loyalty_Points__c = BikeShopApiUtil.getInteger(body, 'aiops_education__Loyalty_Points__c');
+            if (body.containsKey('Loyalty_Points__c')) {
+                customer.Loyalty_Points__c = BikeShopApiUtil.getInteger(body, 'Loyalty_Points__c');
             }
-            if (body.containsKey('aiops_education__Is_Active__c')) {
-                customer.aiops_education__Is_Active__c = BikeShopApiUtil.getBoolean(body, 'aiops_education__Is_Active__c');
+            if (body.containsKey('Is_Active__c')) {
+                customer.Is_Active__c = BikeShopApiUtil.getBoolean(body, 'Is_Active__c');
             }
             if (body.containsKey('Name')) {
                 String nameValue = BikeShopApiUtil.getString(body, 'Name');
@@ -130,29 +135,28 @@ global with sharing class CustomerRestService {
             }
 
             update customer;
-            return JSON.serialize(customer);
+            return BikeShopApiUtil.formatJsonResponse(new CustomerDto(customer));
         } catch (QueryException qex) {
-            return JSON.serialize(BikeShopApiUtil.errorResponse(new BikeShopApiUtil.ApiException('Customer not found.', 404)));
+            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(new BikeShopApiUtil.ApiException('Customer not found.', 404)));
         } catch (Exception ex) {
-            return JSON.serialize(BikeShopApiUtil.errorResponse(ex));
+            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
         }
     }
 
     @HttpDelete
-    global static String deleteCustomer() {
+    global static void deleteCustomer() {
         try {
-            if (!Schema.sObjectType.aiops_education__Customer__c.isDeletable()) {
+            if (!Schema.sObjectType.Customer__c.isDeletable()) {
                 throw new BikeShopApiUtil.ApiException('No delete access to Customer.', 403);
             }
 
             Id customerId = BikeShopApiUtil.getIdFromUri();
-            delete [SELECT Id FROM aiops_education__Customer__c WHERE Id = :customerId LIMIT 1];
+            delete [SELECT Id FROM Customer__c WHERE Id = :customerId LIMIT 1];
             RestContext.response.statusCode = 204;
-            return null;
         } catch (QueryException qex) {
-            return JSON.serialize(BikeShopApiUtil.errorResponse(new BikeShopApiUtil.ApiException('Customer not found.', 404)));
+            RestContext.response.responseBody = Blob.valueOf(JSON.serialize(BikeShopApiUtil.errorResponse(new BikeShopApiUtil.ApiException('Customer not found.', 404))));
         } catch (Exception ex) {
-            return JSON.serialize(BikeShopApiUtil.errorResponse(ex));
+            RestContext.response.responseBody = Blob.valueOf(JSON.serialize(BikeShopApiUtil.errorResponse(ex)));
         }
     }
 }

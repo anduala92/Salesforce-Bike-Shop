@@ -134,6 +134,19 @@ public with sharing class BikeShopApiUtil {
         };
     }
 
+    public static Map<String, Object> listResponseWithDtos(List<Object> dtos, Integer total, Integer page, Integer pageSize) {
+        return new Map<String, Object>{
+            'page' => page,
+            'pageSize' => pageSize,
+            'total' => total,
+            'records' => dtos
+        };
+    }
+
+    public static String formatJsonResponse(Object data) {
+        return JSON.serialize(data);
+    }
+
     public static Map<String, Object> errorResponse(Exception ex) {
         Integer status = 500;
         String message = ex.getMessage();

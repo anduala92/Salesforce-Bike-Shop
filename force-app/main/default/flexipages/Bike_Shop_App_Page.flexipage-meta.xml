@@ -3,8 +3,8 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentName>aiops_education:bikeShopApp</componentName>
-                <identifier>aiops_education_bikeShopApp</identifier>
+                <componentName>bikeShopApp</componentName>
+                <identifier>bikeShopApp</identifier>
             </componentInstance>
         </itemInstances>
         <name>main</name>

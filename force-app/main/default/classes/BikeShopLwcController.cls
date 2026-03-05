@@ -26,16 +26,16 @@ public with sharing class BikeShopLwcController {
         Integer size = normalizePageSize(pageSize);
         Integer offsetRows = (page - 1) * size;
 
-        List<aiops_education__Bike__c> rows;
+        List<Bike__c> rows;
         Integer total;
 
         if (String.isBlank(search)) {
-            total = [SELECT COUNT() FROM aiops_education__Bike__c];
+            total = [SELECT COUNT() FROM Bike__c];
             rows = [
-                SELECT Id, Name, aiops_education__Model__c, aiops_education__Brand__c, aiops_education__Category__c,
-                       aiops_education__Daily_Rate__c, aiops_education__Available__c, aiops_education__Mileage__c,
-                       aiops_education__Last_Service_Date__c
-                FROM aiops_education__Bike__c
+                SELECT Id, Name, Model__c, Brand__c, Category__c,
+                       Daily_Rate__c, Available__c, Mileage__c,
+                       Last_Service_Date__c
+                FROM Bike__c
                 ORDER BY CreatedDate DESC
                 LIMIT :size
                 OFFSET :offsetRows
@@ -44,19 +44,19 @@ public with sharing class BikeShopLwcController {
             String likeSearch = '%' + search + '%';
             total = [
                 SELECT COUNT()
-                FROM aiops_education__Bike__c
+                FROM Bike__c
                 WHERE Name LIKE :likeSearch
-                   OR aiops_education__Model__c LIKE :likeSearch
-                   OR aiops_education__Brand__c LIKE :likeSearch
+                   OR Model__c LIKE :likeSearch
+                   OR Brand__c LIKE :likeSearch
             ];
             rows = [
-                SELECT Id, Name, aiops_education__Model__c, aiops_education__Brand__c, aiops_education__Category__c,
-                       aiops_education__Daily_Rate__c, aiops_education__Available__c, aiops_education__Mileage__c,
-                       aiops_education__Last_Service_Date__c
-                FROM aiops_education__Bike__c
+                SELECT Id, Name, Model__c, Brand__c, Category__c,
+                       Daily_Rate__c, Available__c, Mileage__c,
+                       Last_Service_Date__c
+                FROM Bike__c
                 WHERE Name LIKE :likeSearch
-                   OR aiops_education__Model__c LIKE :likeSearch
-                   OR aiops_education__Brand__c LIKE :likeSearch
+                   OR Model__c LIKE :likeSearch
+                   OR Brand__c LIKE :likeSearch
                 ORDER BY CreatedDate DESC
                 LIMIT :size
                 OFFSET :offsetRows
@@ -77,16 +77,16 @@ public with sharing class BikeShopLwcController {
         Integer size = normalizePageSize(pageSize);
         Integer offsetRows = (page - 1) * size;
 
-        List<aiops_education__Customer__c> rows;
+        List<Customer__c> rows;
         Integer total;
 
         if (String.isBlank(search)) {
-            total = [SELECT COUNT() FROM aiops_education__Customer__c];
+            total = [SELECT COUNT() FROM Customer__c];
             rows = [
-                SELECT Id, Name, aiops_education__First_Name__c, aiops_education__Last_Name__c, aiops_education__Email__c,
-                       aiops_education__Phone__c, aiops_education__Birth_Date__c, aiops_education__Loyalty_Points__c,
-                       aiops_education__Is_Active__c
-                FROM aiops_education__Customer__c
+                SELECT Id, Name, First_Name__c, Last_Name__c, Email__c,
+                       Phone__c, Birth_Date__c, Loyalty_Points__c,
+                       Is_Active__c
+                FROM Customer__c
                 ORDER BY CreatedDate DESC
                 LIMIT :size
                 OFFSET :offsetRows
@@ -95,19 +95,19 @@ public with sharing class BikeShopLwcController {
             String likeSearch = '%' + search + '%';
             total = [
                 SELECT COUNT()
-                FROM aiops_education__Customer__c
-                WHERE aiops_education__First_Name__c LIKE :likeSearch
-                   OR aiops_education__Last_Name__c LIKE :likeSearch
-                   OR aiops_education__Email__c LIKE :likeSearch
+                FROM Customer__c
+                WHERE First_Name__c LIKE :likeSearch
+                   OR Last_Name__c LIKE :likeSearch
+                   OR Email__c LIKE :likeSearch
             ];
             rows = [
-                SELECT Id, Name, aiops_education__First_Name__c, aiops_education__Last_Name__c, aiops_education__Email__c,
-                       aiops_education__Phone__c, aiops_education__Birth_Date__c, aiops_education__Loyalty_Points__c,
-                       aiops_education__Is_Active__c
-                FROM aiops_education__Customer__c
-                WHERE aiops_education__First_Name__c LIKE :likeSearch
-                   OR aiops_education__Last_Name__c LIKE :likeSearch
-                   OR aiops_education__Email__c LIKE :likeSearch
+                SELECT Id, Name, First_Name__c, Last_Name__c, Email__c,
+                       Phone__c, Birth_Date__c, Loyalty_Points__c,
+                       Is_Active__c
+                FROM Customer__c
+                WHERE First_Name__c LIKE :likeSearch
+                   OR Last_Name__c LIKE :likeSearch
+                   OR Email__c LIKE :likeSearch
                 ORDER BY CreatedDate DESC
                 LIMIT :size
                 OFFSET :offsetRows
@@ -128,17 +128,17 @@ public with sharing class BikeShopLwcController {
         Integer size = normalizePageSize(pageSize);
         Integer offsetRows = (page - 1) * size;
 
-        List<aiops_education__Bike_Rental__c> rows;
+        List<Bike_Rental__c> rows;
         Integer total;
 
         if (String.isBlank(status)) {
-            total = [SELECT COUNT() FROM aiops_education__Bike_Rental__c];
+            total = [SELECT COUNT() FROM Bike_Rental__c];
             rows = [
-                SELECT Id, Name, aiops_education__Bike__c, aiops_education__Bike__r.Name, aiops_education__Customer__c,
-                       aiops_education__Customer__r.Name, aiops_education__Start_Date__c, aiops_education__End_Date__c,
-                       aiops_education__Daily_Price__c, aiops_education__Total_Amount__c, aiops_education__Status__c,
-                       aiops_education__Paid__c
-                FROM aiops_education__Bike_Rental__c
+                SELECT Id, Name, Bike__c, Bike__r.Name, Customer__c,
+                       Customer__r.Name, Start_Date__c, End_Date__c,
+                       Daily_Price__c, Total_Amount__c, Status__c,
+                       Paid__c
+                FROM Bike_Rental__c
                 ORDER BY CreatedDate DESC
                 LIMIT :size
                 OFFSET :offsetRows
@@ -146,16 +146,16 @@ public with sharing class BikeShopLwcController {
         } else {
             total = [
                 SELECT COUNT()
-                FROM aiops_education__Bike_Rental__c
-                WHERE aiops_education__Status__c = :status
+                FROM Bike_Rental__c
+                WHERE Status__c = :status
             ];
             rows = [
-                SELECT Id, Name, aiops_education__Bike__c, aiops_education__Bike__r.Name, aiops_education__Customer__c,
-                       aiops_education__Customer__r.Name, aiops_education__Start_Date__c, aiops_education__End_Date__c,
-                       aiops_education__Daily_Price__c, aiops_education__Total_Amount__c, aiops_education__Status__c,
-                       aiops_education__Paid__c
-                FROM aiops_education__Bike_Rental__c
-                WHERE aiops_education__Status__c = :status
+                SELECT Id, Name, Bike__c, Bike__r.Name, Customer__c,
+                       Customer__r.Name, Start_Date__c, End_Date__c,
+                       Daily_Price__c, Total_Amount__c, Status__c,
+                       Paid__c
+                FROM Bike_Rental__c
+                WHERE Status__c = :status
                 ORDER BY CreatedDate DESC
                 LIMIT :size
                 OFFSET :offsetRows
@@ -170,39 +170,81 @@ public with sharing class BikeShopLwcController {
         return result;
     }
 
+    @AuraEnabled(cacheable=true)
+    public static PagedResult searchRentals(Integer pageNumber, Integer pageSize, String searchText, String status) {
+        Integer page = normalizePage(pageNumber);
+        Integer size = normalizePageSize(pageSize);
+        Integer offsetRows = (page - 1) * size;
+
+        List<Bike_Rental__c> rows;
+        Integer total;
+        
+        String searchPattern = '%' + (String.isBlank(searchText) ? '' : searchText.trim()) + '%';
+        
+        // Build WHERE clause dynamically
+        String whereClause = '(Bike__r.Name LIKE :searchPattern OR Customer__r.Name LIKE :searchPattern OR Name LIKE :searchPattern)';
+        
+        if (!String.isBlank(status)) {
+            whereClause += ' AND Status__c = :status';
+        }
+        
+        // Count total matching records
+        String countQuery = 'SELECT COUNT() FROM Bike_Rental__c WHERE ' + whereClause;
+        total = Database.countQuery(countQuery);
+        
+        // Fetch paginated records
+        String queryString = 'SELECT Id, Name, Bike__c, Bike__r.Name, Customer__c, ' +
+                            'Customer__r.Name, Start_Date__c, End_Date__c, ' +
+                            'Daily_Price__c, Total_Amount__c, Status__c, ' +
+                            'Paid__c ' +
+                            'FROM Bike_Rental__c ' +
+                            'WHERE ' + whereClause + ' ' +
+                            'ORDER BY CreatedDate DESC ' +
+                            'LIMIT :size OFFSET :offsetRows';
+        
+        rows = Database.query(queryString);
+
+        PagedResult result = new PagedResult();
+        result.page = page;
+        result.pageSize = size;
+        result.total = total;
+        result.records = rows;
+        return result;
+    }
+
     @AuraEnabled
-    public static aiops_education__Bike__c saveBike(Map<String, Object> payload) {
+    public static Bike__c saveBike(Map<String, Object> payload) {
         if (payload == null) {
             payload = new Map<String, Object>();
         }
 
         Id recordId = payload.containsKey('Id') ? (Id) String.valueOf(payload.get('Id')) : null;
-        aiops_education__Bike__c bike;
+        Bike__c bike;
 
         if (recordId == null) {
-            bike = new aiops_education__Bike__c();
+            bike = new Bike__c();
         } else {
             bike = [
-                SELECT Id, Name, aiops_education__Model__c, aiops_education__Brand__c, aiops_education__Category__c,
-                       aiops_education__Daily_Rate__c, aiops_education__Available__c, aiops_education__Mileage__c,
-                       aiops_education__Last_Service_Date__c
-                FROM aiops_education__Bike__c
+                SELECT Id, Name, Model__c, Brand__c, Category__c,
+                       Daily_Rate__c, Available__c, Mileage__c,
+                       Last_Service_Date__c
+                FROM Bike__c
                 WHERE Id = :recordId
                 LIMIT 1
             ];
         }
 
         if (payload.containsKey('Name')) bike.Name = String.valueOf(payload.get('Name'));
-        if (payload.containsKey('aiops_education__Model__c')) bike.aiops_education__Model__c = String.valueOf(payload.get('aiops_education__Model__c'));
-        if (payload.containsKey('aiops_education__Brand__c')) bike.aiops_education__Brand__c = String.valueOf(payload.get('aiops_education__Brand__c'));
-        if (payload.containsKey('aiops_education__Category__c')) bike.aiops_education__Category__c = String.valueOf(payload.get('aiops_education__Category__c'));
-        if (payload.containsKey('aiops_education__Daily_Rate__c') && payload.get('aiops_education__Daily_Rate__c') != null) bike.aiops_education__Daily_Rate__c = Decimal.valueOf(String.valueOf(payload.get('aiops_education__Daily_Rate__c')));
-        if (payload.containsKey('aiops_education__Available__c')) bike.aiops_education__Available__c = (Boolean) payload.get('aiops_education__Available__c');
-        if (payload.containsKey('aiops_education__Mileage__c') && payload.get('aiops_education__Mileage__c') != null) bike.aiops_education__Mileage__c = Integer.valueOf(String.valueOf(payload.get('aiops_education__Mileage__c')));
-        if (payload.containsKey('aiops_education__Last_Service_Date__c') && payload.get('aiops_education__Last_Service_Date__c') != null) bike.aiops_education__Last_Service_Date__c = Date.valueOf(String.valueOf(payload.get('aiops_education__Last_Service_Date__c')));
+        if (payload.containsKey('Model__c')) bike.Model__c = String.valueOf(payload.get('Model__c'));
+        if (payload.containsKey('Brand__c')) bike.Brand__c = String.valueOf(payload.get('Brand__c'));
+        if (payload.containsKey('Category__c')) bike.Category__c = String.valueOf(payload.get('Category__c'));
+        if (payload.containsKey('Daily_Rate__c') && payload.get('Daily_Rate__c') != null) bike.Daily_Rate__c = Decimal.valueOf(String.valueOf(payload.get('Daily_Rate__c')));
+        if (payload.containsKey('Available__c')) bike.Available__c = (Boolean) payload.get('Available__c');
+        if (payload.containsKey('Mileage__c') && payload.get('Mileage__c') != null) bike.Mileage__c = Integer.valueOf(String.valueOf(payload.get('Mileage__c')));
+        if (payload.containsKey('Last_Service_Date__c') && payload.get('Last_Service_Date__c') != null) bike.Last_Service_Date__c = Date.valueOf(String.valueOf(payload.get('Last_Service_Date__c')));
 
-        if (String.isBlank(bike.Name) && !String.isBlank(bike.aiops_education__Brand__c) && !String.isBlank(bike.aiops_education__Model__c)) {
-            bike.Name = bike.aiops_education__Brand__c + ' ' + bike.aiops_education__Model__c;
+        if (String.isBlank(bike.Name) && !String.isBlank(bike.Brand__c) && !String.isBlank(bike.Model__c)) {
+            bike.Name = bike.Brand__c + ' ' + bike.Model__c;
         }
 
         upsert bike;
@@ -211,50 +253,50 @@ public with sharing class BikeShopLwcController {
 
     @AuraEnabled
     public static void deleteBike(Id bikeId) {
-        delete [SELECT Id FROM aiops_education__Bike__c WHERE Id = :bikeId LIMIT 1];
+        delete [SELECT Id FROM Bike__c WHERE Id = :bikeId LIMIT 1];
     }
 
     @AuraEnabled
-    public static aiops_education__Customer__c saveCustomer(Map<String, Object> payload) {
+    public static Customer__c saveCustomer(Map<String, Object> payload) {
         if (payload == null) {
             payload = new Map<String, Object>();
         }
 
         Id recordId = payload.containsKey('Id') ? (Id) String.valueOf(payload.get('Id')) : null;
-        aiops_education__Customer__c customer;
+        Customer__c customer;
 
         if (recordId == null) {
-            customer = new aiops_education__Customer__c();
+            customer = new Customer__c();
         } else {
             customer = [
-                SELECT Id, Name, aiops_education__First_Name__c, aiops_education__Last_Name__c, aiops_education__Email__c,
-                       aiops_education__Phone__c, aiops_education__Birth_Date__c, aiops_education__Loyalty_Points__c,
-                       aiops_education__Is_Active__c
-                FROM aiops_education__Customer__c
+                SELECT Id, Name, First_Name__c, Last_Name__c, Email__c,
+                       Phone__c, Birth_Date__c, Loyalty_Points__c,
+                       Is_Active__c
+                FROM Customer__c
                 WHERE Id = :recordId
                 LIMIT 1
             ];
         }
 
         if (payload.containsKey('Name')) customer.Name = String.valueOf(payload.get('Name'));
-        if (payload.containsKey('aiops_education__First_Name__c')) customer.aiops_education__First_Name__c = String.valueOf(payload.get('aiops_education__First_Name__c'));
-        if (payload.containsKey('aiops_education__Last_Name__c')) customer.aiops_education__Last_Name__c = String.valueOf(payload.get('aiops_education__Last_Name__c'));
-        if (payload.containsKey('aiops_education__Email__c')) customer.aiops_education__Email__c = String.valueOf(payload.get('aiops_education__Email__c'));
-        if (payload.containsKey('aiops_education__Phone__c')) customer.aiops_education__Phone__c = String.valueOf(payload.get('aiops_education__Phone__c'));
-        if (payload.containsKey('aiops_education__Birth_Date__c') && payload.get('aiops_education__Birth_Date__c') != null) customer.aiops_education__Birth_Date__c = Date.valueOf(String.valueOf(payload.get('aiops_education__Birth_Date__c')));
-        if (payload.containsKey('aiops_education__Loyalty_Points__c') && payload.get('aiops_education__Loyalty_Points__c') != null) customer.aiops_education__Loyalty_Points__c = Integer.valueOf(String.valueOf(payload.get('aiops_education__Loyalty_Points__c')));
-        if (payload.containsKey('aiops_education__Is_Active__c')) customer.aiops_education__Is_Active__c = (Boolean) payload.get('aiops_education__Is_Active__c');
+        if (payload.containsKey('First_Name__c')) customer.First_Name__c = String.valueOf(payload.get('First_Name__c'));
+        if (payload.containsKey('Last_Name__c')) customer.Last_Name__c = String.valueOf(payload.get('Last_Name__c'));
+        if (payload.containsKey('Email__c')) customer.Email__c = String.valueOf(payload.get('Email__c'));
+        if (payload.containsKey('Phone__c')) customer.Phone__c = String.valueOf(payload.get('Phone__c'));
+        if (payload.containsKey('Birth_Date__c') && payload.get('Birth_Date__c') != null) customer.Birth_Date__c = Date.valueOf(String.valueOf(payload.get('Birth_Date__c')));
+        if (payload.containsKey('Loyalty_Points__c') && payload.get('Loyalty_Points__c') != null) customer.Loyalty_Points__c = Integer.valueOf(String.valueOf(payload.get('Loyalty_Points__c')));
+        if (payload.containsKey('Is_Active__c')) customer.Is_Active__c = (Boolean) payload.get('Is_Active__c');
 
-        if (String.isBlank(customer.Name) && !String.isBlank(customer.aiops_education__First_Name__c) && !String.isBlank(customer.aiops_education__Last_Name__c)) {
-            customer.Name = customer.aiops_education__First_Name__c + ' ' + customer.aiops_education__Last_Name__c;
+        if (String.isBlank(customer.Name) && !String.isBlank(customer.First_Name__c) && !String.isBlank(customer.Last_Name__c)) {
+            customer.Name = customer.First_Name__c + ' ' + customer.Last_Name__c;
         }
 
         // Validate email uniqueness
-        if (!String.isBlank(customer.aiops_education__Email__c)) {
-            String email = customer.aiops_education__Email__c.toLowerCase();
-            List<aiops_education__Customer__c> existingCustomers = [
-                SELECT Id FROM aiops_education__Customer__c 
-                WHERE aiops_education__Email__c = :customer.aiops_education__Email__c
+        if (!String.isBlank(customer.Email__c)) {
+            String email = customer.Email__c.toLowerCase();
+            List<Customer__c> existingCustomers = [
+                SELECT Id FROM Customer__c 
+                WHERE Email__c = :customer.Email__c
                 AND Id != :customer.Id
                 LIMIT 1
             ];
@@ -269,65 +311,65 @@ public with sharing class BikeShopLwcController {
 
     @AuraEnabled
     public static void deleteCustomer(Id customerId) {
-        delete [SELECT Id FROM aiops_education__Customer__c WHERE Id = :customerId LIMIT 1];
+        delete [SELECT Id FROM Customer__c WHERE Id = :customerId LIMIT 1];
     }
 
     @AuraEnabled
-    public static aiops_education__Bike_Rental__c saveRental(Map<String, Object> payload) {
+    public static Bike_Rental__c saveRental(Map<String, Object> payload) {
         if (payload == null) {
             payload = new Map<String, Object>();
         }
 
         Id recordId = payload.containsKey('Id') ? (Id) String.valueOf(payload.get('Id')) : null;
-        aiops_education__Bike_Rental__c rental;
+        Bike_Rental__c rental;
 
         if (recordId == null) {
-            rental = new aiops_education__Bike_Rental__c();
+            rental = new Bike_Rental__c();
         } else {
             rental = [
-                SELECT Id, aiops_education__Bike__c, aiops_education__Customer__c, aiops_education__Start_Date__c,
-                       aiops_education__End_Date__c, aiops_education__Daily_Price__c, aiops_education__Total_Amount__c,
-                       aiops_education__Status__c, aiops_education__Paid__c
-                FROM aiops_education__Bike_Rental__c
+                SELECT Id, Bike__c, Customer__c, Start_Date__c,
+                       End_Date__c, Daily_Price__c, Total_Amount__c,
+                       Status__c, Paid__c
+                FROM Bike_Rental__c
                 WHERE Id = :recordId
                 LIMIT 1
             ];
         }
 
-        if (payload.containsKey('aiops_education__Bike__c')) rental.aiops_education__Bike__c = (Id) String.valueOf(payload.get('aiops_education__Bike__c'));
-        if (payload.containsKey('aiops_education__Customer__c')) rental.aiops_education__Customer__c = (Id) String.valueOf(payload.get('aiops_education__Customer__c'));
+        if (payload.containsKey('Bike__c')) rental.Bike__c = (Id) String.valueOf(payload.get('Bike__c'));
+        if (payload.containsKey('Customer__c')) rental.Customer__c = (Id) String.valueOf(payload.get('Customer__c'));
         
         // Парсиране на дати - получаваме YYYY-MM-DDTHH:MM:SSZ от JavaScript
-        if (payload.containsKey('aiops_education__Start_Date__c') && payload.get('aiops_education__Start_Date__c') != null) {
-            String startDateStr = String.valueOf(payload.get('aiops_education__Start_Date__c')).trim();
+        if (payload.containsKey('Start_Date__c') && payload.get('Start_Date__c') != null) {
+            String startDateStr = String.valueOf(payload.get('Start_Date__c')).trim();
             System.debug('DEBUG: Received Start Date String: ' + startDateStr);
             // Вземи само датата (YYYY-MM-DD) игнорирай време и Z
             if (startDateStr.contains('T')) {
                 startDateStr = startDateStr.split('T')[0];
             }
             System.debug('DEBUG: Parsed Start Date String: ' + startDateStr);
-            rental.aiops_education__Start_Date__c = Date.valueOf(startDateStr);
-            System.debug('DEBUG: Converted Start Date: ' + rental.aiops_education__Start_Date__c);
+            rental.Start_Date__c = Date.valueOf(startDateStr);
+            System.debug('DEBUG: Converted Start Date: ' + rental.Start_Date__c);
         }
-        if (payload.containsKey('aiops_education__End_Date__c') && payload.get('aiops_education__End_Date__c') != null) {
-            String endDateStr = String.valueOf(payload.get('aiops_education__End_Date__c')).trim();
+        if (payload.containsKey('End_Date__c') && payload.get('End_Date__c') != null) {
+            String endDateStr = String.valueOf(payload.get('End_Date__c')).trim();
             System.debug('DEBUG: Received End Date String: ' + endDateStr);
             // Вземи само датата (YYYY-MM-DD) игнорирай време и Z
             if (endDateStr.contains('T')) {
                 endDateStr = endDateStr.split('T')[0];
             }
             System.debug('DEBUG: Parsed End Date String: ' + endDateStr);
-            rental.aiops_education__End_Date__c = Date.valueOf(endDateStr);
-            System.debug('DEBUG: Converted End Date: ' + rental.aiops_education__End_Date__c);
+            rental.End_Date__c = Date.valueOf(endDateStr);
+            System.debug('DEBUG: Converted End Date: ' + rental.End_Date__c);
         }
         
-        if (payload.containsKey('aiops_education__Daily_Price__c') && payload.get('aiops_education__Daily_Price__c') != null) rental.aiops_education__Daily_Price__c = Decimal.valueOf(String.valueOf(payload.get('aiops_education__Daily_Price__c')));
-        if (payload.containsKey('aiops_education__Status__c')) rental.aiops_education__Status__c = String.valueOf(payload.get('aiops_education__Status__c'));
-        if (payload.containsKey('aiops_education__Paid__c')) rental.aiops_education__Paid__c = (Boolean) payload.get('aiops_education__Paid__c');
+        if (payload.containsKey('Daily_Price__c') && payload.get('Daily_Price__c') != null) rental.Daily_Price__c = Decimal.valueOf(String.valueOf(payload.get('Daily_Price__c')));
+        if (payload.containsKey('Status__c')) rental.Status__c = String.valueOf(payload.get('Status__c'));
+        if (payload.containsKey('Paid__c')) rental.Paid__c = (Boolean) payload.get('Paid__c');
 
-        if (rental.aiops_education__Start_Date__c != null && rental.aiops_education__End_Date__c != null && rental.aiops_education__Daily_Price__c != null) {
-            Integer rentalDays = rental.aiops_education__Start_Date__c.daysBetween(rental.aiops_education__End_Date__c) + 1;
-            rental.aiops_education__Total_Amount__c = rental.aiops_education__Daily_Price__c * rentalDays;
+        if (rental.Start_Date__c != null && rental.End_Date__c != null && rental.Daily_Price__c != null) {
+            Integer rentalDays = rental.Start_Date__c.daysBetween(rental.End_Date__c) + 1;
+            rental.Total_Amount__c = rental.Daily_Price__c * rentalDays;
         }
 
         upsert rental;
@@ -336,23 +378,23 @@ public with sharing class BikeShopLwcController {
 
     @AuraEnabled
     public static void deleteRental(Id rentalId) {
-        delete [SELECT Id FROM aiops_education__Bike_Rental__c WHERE Id = :rentalId LIMIT 1];
+        delete [SELECT Id FROM Bike_Rental__c WHERE Id = :rentalId LIMIT 1];
     }
 
     @AuraEnabled
     public static List<Map<String, String>> getBikeOptions() {
         List<Map<String, String>> options = new List<Map<String, String>>();
-        List<aiops_education__Bike__c> bikes = [
-            SELECT Id, Name, aiops_education__Daily_Rate__c 
-            FROM aiops_education__Bike__c 
-            WHERE aiops_education__Available__c = true
+        List<Bike__c> bikes = [
+            SELECT Id, Name, Daily_Rate__c 
+            FROM Bike__c 
+            WHERE Available__c = true
             ORDER BY Name ASC
         ];
-        for (aiops_education__Bike__c bike : bikes) {
+        for (Bike__c bike : bikes) {
             Map<String, String> option = new Map<String, String>();
             option.put('label', bike.Name);
             option.put('value', bike.Id);
-            option.put('dailyRate', String.valueOf(bike.aiops_education__Daily_Rate__c));
+            option.put('dailyRate', String.valueOf(bike.Daily_Rate__c));
             options.add(option);
         }
         return options;
@@ -361,13 +403,13 @@ public with sharing class BikeShopLwcController {
     @AuraEnabled
     public static List<Map<String, String>> getCustomerOptions() {
         List<Map<String, String>> options = new List<Map<String, String>>();
-        List<aiops_education__Customer__c> customers = [
+        List<Customer__c> customers = [
             SELECT Id, Name 
-            FROM aiops_education__Customer__c 
-            WHERE aiops_education__Is_Active__c = true
+            FROM Customer__c 
+            WHERE Is_Active__c = true
             ORDER BY Name ASC
         ];
-        for (aiops_education__Customer__c customer : customers) {
+        for (Customer__c customer : customers) {
             Map<String, String> option = new Map<String, String>();
             option.put('label', customer.Name);
             option.put('value', customer.Id);
@@ -376,7 +418,7 @@ public with sharing class BikeShopLwcController {
         return options;
     }
 
-    @AuraEnabled
+    @AuraEnabled(cacheable=true)
     public static Map<String, Object> checkBikeAvailability(Id bikeId, Date startDate, Date endDate, Id excludeRentalId) {
         Map<String, Object> result = new Map<String, Object>();
         result.put('isAvailable', true);
@@ -387,20 +429,20 @@ public with sharing class BikeShopLwcController {
         }
         
         // Check for overlapping rentals with the same bike
-        List<aiops_education__Bike_Rental__c> conflicts = [
-            SELECT Id, Name, aiops_education__Start_Date__c, aiops_education__End_Date__c,
-                   aiops_education__Customer__r.Name
-            FROM aiops_education__Bike_Rental__c
-            WHERE aiops_education__Bike__c = :bikeId
-            AND aiops_education__Start_Date__c <= :endDate
-            AND aiops_education__End_Date__c >= :startDate
-            AND aiops_education__Status__c != 'Cancelled'
+        List<Bike_Rental__c> conflicts = [
+            SELECT Id, Name, Start_Date__c, End_Date__c,
+                   Customer__r.Name
+            FROM Bike_Rental__c
+            WHERE Bike__c = :bikeId
+            AND Start_Date__c <= :endDate
+            AND End_Date__c >= :startDate
+            AND Status__c != 'Cancelled'
         ];
         
         // Filter out the excluded rental if provided
         if (excludeRentalId != null) {
-            List<aiops_education__Bike_Rental__c> filteredConflicts = new List<aiops_education__Bike_Rental__c>();
-            for (aiops_education__Bike_Rental__c rental : conflicts) {
+            List<Bike_Rental__c> filteredConflicts = new List<Bike_Rental__c>();
+            for (Bike_Rental__c rental : conflicts) {
                 if (rental.Id != excludeRentalId) {
                     filteredConflicts.add(rental);
                 }
@@ -411,13 +453,13 @@ public with sharing class BikeShopLwcController {
         if (!conflicts.isEmpty()) {
             result.put('isAvailable', false);
             List<Map<String, Object>> conflictList = new List<Map<String, Object>>();
-            for (aiops_education__Bike_Rental__c rental : conflicts) {
+            for (Bike_Rental__c rental : conflicts) {
                 Map<String, Object> conflict = new Map<String, Object>();
                 conflict.put('rentalId', rental.Id);
                 conflict.put('rentalName', rental.Name);
-                conflict.put('startDate', rental.aiops_education__Start_Date__c);
-                conflict.put('endDate', rental.aiops_education__End_Date__c);
-                conflict.put('customerName', rental.aiops_education__Customer__r.Name);
+                conflict.put('startDate', rental.Start_Date__c);
+                conflict.put('endDate', rental.End_Date__c);
+                conflict.put('customerName', rental.Customer__r.Name);
                 conflictList.add(conflict);
             }
             result.put('conflictingRentals', conflictList);
@@ -425,8 +467,7 @@ public with sharing class BikeShopLwcController {
         
         return result;
     }
-
-    @AuraEnabled
+    @AuraEnabled(cacheable=true)
     public static List<String> getStatusOptions() {
         List<String> statusOptions = new List<String>();
         statusOptions.add('Draft');
@@ -435,4 +476,17 @@ public with sharing class BikeShopLwcController {
         statusOptions.add('Cancelled');
         return statusOptions;
     }
+
+    @AuraEnabled(cacheable=true)
+    public static List<String> getBikeCategoryOptions() {
+        List<String> categoryOptions = new List<String>();
+        // Get picklist values from the Bike Category field
+        Schema.DescribeFieldResult fieldResult = Bike__c.Category__c.getDescribe();
+        List<Schema.PicklistEntry> picklistEntries = fieldResult.getPicklistValues();
+        for (Schema.PicklistEntry entry : picklistEntries) {
+            categoryOptions.add(entry.getValue());
+        }
+        return categoryOptions;
+    }
 }
+

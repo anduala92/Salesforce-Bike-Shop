@@ -2,39 +2,39 @@
 private with sharing class BikeShopApiTest {
     @TestSetup
     static void setupData() {
-        aiops_education__Bike__c bike = new aiops_education__Bike__c(
+        Bike__c bike = new Bike__c(
             Name = 'Cube Agree C62',
-            aiops_education__Model__c = 'Agree C62',
-            aiops_education__Brand__c = 'Cube',
-            aiops_education__Category__c = 'Road',
-            aiops_education__Daily_Rate__c = 45,
-            aiops_education__Available__c = true,
-            aiops_education__Mileage__c = 1200,
-            aiops_education__Last_Service_Date__c = Date.today().addDays(-20)
+            Model__c = 'Agree C62',
+            Brand__c = 'Cube',
+            Category__c = 'Road',
+            Daily_Rate__c = 45,
+            Available__c = true,
+            Mileage__c = 1200,
+            Last_Service_Date__c = Date.today().addDays(-20)
         );
         insert bike;
 
-        aiops_education__Customer__c customer = new aiops_education__Customer__c(
+        Customer__c customer = new Customer__c(
             Name = 'Ivan Petrov',
-            aiops_education__First_Name__c = 'Ivan',
-            aiops_education__Last_Name__c = 'Petrov',
-            aiops_education__Email__c = 'ivan.petrov@example.com',
-            aiops_education__Phone__c = '+359888123123',
-            aiops_education__Birth_Date__c = Date.newInstance(1998, 5, 12),
-            aiops_education__Loyalty_Points__c = 50,
-            aiops_education__Is_Active__c = true
+            First_Name__c = 'Ivan',
+            Last_Name__c = 'Petrov',
+            Email__c = 'ivan.petrov@example.com',
+            Phone__c = '+359888123123',
+            Birth_Date__c = Date.newInstance(1998, 5, 12),
+            Loyalty_Points__c = 50,
+            Is_Active__c = true
         );
         insert customer;
 
-        aiops_education__Bike_Rental__c rental = new aiops_education__Bike_Rental__c(
-            aiops_education__Bike__c = bike.Id,
-            aiops_education__Customer__c = customer.Id,
-            aiops_education__Start_Date__c = Date.today(),
-            aiops_education__End_Date__c = Date.today().addDays(2),
-            aiops_education__Daily_Price__c = 45,
-            aiops_education__Total_Amount__c = 135,
-            aiops_education__Status__c = 'Active',
-            aiops_education__Paid__c = false
+        Bike_Rental__c rental = new Bike_Rental__c(
+            Bike__c = bike.Id,
+            Customer__c = customer.Id,
+            Start_Date__c = Date.today(),
+            End_Date__c = Date.today().addDays(2),
+            Daily_Price__c = 45,
+            Total_Amount__c = 135,
+            Status__c = 'Active',
+            Paid__c = false
         );
         insert rental;
     }
@@ -57,22 +57,22 @@ private with sharing class BikeShopApiTest {
         RestRequest postReq = new RestRequest();
         postReq.requestUri = '/services/apexrest/bikeshop/v1/bikes';
         postReq.httpMethod = 'POST';
-        postReq.requestBody = Blob.valueOf('{"aiops_education__Model__c":"Domane","aiops_education__Brand__c":"Trek","aiops_education__Category__c":"Road","aiops_education__Daily_Rate__c":55}');
+        postReq.requestBody = Blob.valueOf('{"Model__c":"Domane","Brand__c":"Trek","Category__c":"Road","Daily_Rate__c":55}');
         RestContext.request = postReq;
         RestContext.response = new RestResponse();
 
-        aiops_education__Bike__c created = (aiops_education__Bike__c) JSON.deserialize(BikeRestService.createBike(), aiops_education__Bike__c.class);
+        Bike__c created = (Bike__c) JSON.deserialize(BikeRestService.createBike(), Bike__c.class);
         System.assertNotEquals(null, created.Id);
 
         RestRequest patchReq = new RestRequest();
         patchReq.requestUri = '/services/apexrest/bikeshop/v1/bikes/' + created.Id;
         patchReq.httpMethod = 'PATCH';
-        patchReq.requestBody = Blob.valueOf('{"aiops_education__Daily_Rate__c":65}');
+        patchReq.requestBody = Blob.valueOf('{"Daily_Rate__c":65}');
         RestContext.request = patchReq;
         RestContext.response = new RestResponse();
 
-        aiops_education__Bike__c updated = (aiops_education__Bike__c) JSON.deserialize(BikeRestService.updateBike(), aiops_education__Bike__c.class);
-        System.assertEquals(65, updated.aiops_education__Daily_Rate__c);
+        Bike__c updated = (Bike__c) JSON.deserialize(BikeRestService.updateBike(), Bike__c.class);
+        System.assertEquals(65, updated.Daily_Rate__c);
 
         RestRequest deleteReq = new RestRequest();
         deleteReq.requestUri = '/services/apexrest/bikeshop/v1/bikes/' + created.Id;
@@ -81,7 +81,7 @@ private with sharing class BikeShopApiTest {
         RestContext.response = new RestResponse();
 
         BikeRestService.deleteBike();
-        System.assertEquals(0, [SELECT COUNT() FROM aiops_education__Bike__c WHERE Id = :created.Id]);
+        System.assertEquals(0, [SELECT COUNT() FROM Bike__c WHERE Id = :created.Id]);
     }
 
     @IsTest
@@ -102,22 +102,22 @@ private with sharing class BikeShopApiTest {
         RestRequest postReq = new RestRequest();
         postReq.requestUri = '/services/apexrest/bikeshop/v1/customers';
         postReq.httpMethod = 'POST';
-        postReq.requestBody = Blob.valueOf('{"aiops_education__First_Name__c":"Mila","aiops_education__Last_Name__c":"Georgieva","aiops_education__Email__c":"mila.georgieva@example.com"}');
+        postReq.requestBody = Blob.valueOf('{"First_Name__c":"Mila","Last_Name__c":"Georgieva","Email__c":"mila.georgieva@example.com"}');
         RestContext.request = postReq;
         RestContext.response = new RestResponse();
 
-        aiops_education__Customer__c created = (aiops_education__Customer__c) JSON.deserialize(CustomerRestService.createCustomer(), aiops_education__Customer__c.class);
+        Customer__c created = (Customer__c) JSON.deserialize(CustomerRestService.createCustomer(), Customer__c.class);
         System.assertNotEquals(null, created.Id);
 
         RestRequest patchReq = new RestRequest();
         patchReq.requestUri = '/services/apexrest/bikeshop/v1/customers/' + created.Id;
         patchReq.httpMethod = 'PATCH';
-        patchReq.requestBody = Blob.valueOf('{"aiops_education__Phone__c":"+359888000111"}');
+        patchReq.requestBody = Blob.valueOf('{"Phone__c":"+359888000111"}');
         RestContext.request = patchReq;
         RestContext.response = new RestResponse();
 
-        aiops_education__Customer__c updated = (aiops_education__Customer__c) JSON.deserialize(CustomerRestService.updateCustomer(), aiops_education__Customer__c.class);
-        System.assertEquals('+359888000111', updated.aiops_education__Phone__c);
+        Customer__c updated = (Customer__c) JSON.deserialize(CustomerRestService.updateCustomer(), Customer__c.class);
+        System.assertEquals('+359888000111', updated.Phone__c);
 
         RestRequest deleteReq = new RestRequest();
         deleteReq.requestUri = '/services/apexrest/bikeshop/v1/customers/' + created.Id;
@@ -126,13 +126,13 @@ private with sharing class BikeShopApiTest {
         RestContext.response = new RestResponse();
 
         CustomerRestService.deleteCustomer();
-        System.assertEquals(0, [SELECT COUNT() FROM aiops_education__Customer__c WHERE Id = :created.Id]);
+        System.assertEquals(0, [SELECT COUNT() FROM Customer__c WHERE Id = :created.Id]);
     }
 
     @IsTest
     static void rentalEndpoints_ShouldSupportCrudAndSearch() {
-        aiops_education__Bike__c bike = [SELECT Id FROM aiops_education__Bike__c LIMIT 1];
-        aiops_education__Customer__c customer = [SELECT Id FROM aiops_education__Customer__c LIMIT 1];
+        Bike__c bike = [SELECT Id FROM Bike__c LIMIT 1];
+        Customer__c customer = [SELECT Id FROM Customer__c LIMIT 1];
 
         RestRequest getReq = new RestRequest();
         getReq.requestUri = '/services/apexrest/bikeshop/v1/rentals';
@@ -150,23 +150,23 @@ private with sharing class BikeShopApiTest {
         RestRequest postReq = new RestRequest();
         postReq.requestUri = '/services/apexrest/bikeshop/v1/rentals';
         postReq.httpMethod = 'POST';
-        postReq.requestBody = Blob.valueOf('{"aiops_education__Bike__c":"' + bike.Id + '","aiops_education__Customer__c":"' + customer.Id + '","aiops_education__Start_Date__c":"2026-03-01","aiops_education__End_Date__c":"2026-03-03","aiops_education__Daily_Price__c":40,"aiops_education__Status__c":"Draft"}');
+        postReq.requestBody = Blob.valueOf('{"Bike__c":"' + bike.Id + '","Customer__c":"' + customer.Id + '","Start_Date__c":"2026-03-01","End_Date__c":"2026-03-03","Daily_Price__c":40,"Status__c":"Draft"}');
         RestContext.request = postReq;
         RestContext.response = new RestResponse();
 
-        aiops_education__Bike_Rental__c created = (aiops_education__Bike_Rental__c) JSON.deserialize(RentalRestService.createRental(), aiops_education__Bike_Rental__c.class);
+        Bike_Rental__c created = (Bike_Rental__c) JSON.deserialize(RentalRestService.createRental(), Bike_Rental__c.class);
         System.assertNotEquals(null, created.Id);
 
         RestRequest patchReq = new RestRequest();
         patchReq.requestUri = '/services/apexrest/bikeshop/v1/rentals/' + created.Id;
         patchReq.httpMethod = 'PATCH';
-        patchReq.requestBody = Blob.valueOf('{"aiops_education__Status__c":"Completed","aiops_education__Paid__c":true}');
+        patchReq.requestBody = Blob.valueOf('{"Status__c":"Completed","Paid__c":true}');
         RestContext.request = patchReq;
         RestContext.response = new RestResponse();
 
-        aiops_education__Bike_Rental__c updated = (aiops_education__Bike_Rental__c) JSON.deserialize(RentalRestService.updateRental(), aiops_education__Bike_Rental__c.class);
-        System.assertEquals('Completed', updated.aiops_education__Status__c);
-        System.assertEquals(true, updated.aiops_education__Paid__c);
+        Bike_Rental__c updated = (Bike_Rental__c) JSON.deserialize(RentalRestService.updateRental(), Bike_Rental__c.class);
+        System.assertEquals('Completed', updated.Status__c);
+        System.assertEquals(true, updated.Paid__c);
 
         RestRequest deleteReq = new RestRequest();
         deleteReq.requestUri = '/services/apexrest/bikeshop/v1/rentals/' + created.Id;
@@ -175,6 +175,6 @@ private with sharing class BikeShopApiTest {
         RestContext.response = new RestResponse();
 
         RentalRestService.deleteRental();
-        System.assertEquals(0, [SELECT COUNT() FROM aiops_education__Bike_Rental__c WHERE Id = :created.Id]);
+        System.assertEquals(0, [SELECT COUNT() FROM Bike_Rental__c WHERE Id = :created.Id]);
     }
 }

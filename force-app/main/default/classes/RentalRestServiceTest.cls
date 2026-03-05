@@ -49,11 +49,10 @@ private class RentalRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = RentalRestService.getRentals();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        RentalListResponseDto response = RentalRestService.getRentals();
         
-        System.assertEquals(1, response.get('total'));
-        System.assert(response.containsKey('records'));
+        System.assertEquals(1, response.total);
+        System.assert(response.records != null);
     }
     
     @IsTest
@@ -67,12 +66,10 @@ private class RentalRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = RentalRestService.getRentals();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        RentalListResponseDto response = RentalRestService.getRentals();
         
-        System.assertEquals(1, response.get('total'));
-        List<Object> records = (List<Object>) response.get('records');
-        System.assertEquals(1, records.size());
+        System.assertEquals(1, response.total);
+        System.assertEquals(1, response.records.size());
     }
     
     @IsTest
@@ -86,10 +83,9 @@ private class RentalRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = RentalRestService.getRentals();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        RentalListResponseDto response = RentalRestService.getRentals();
         
-        System.assertEquals(0, response.get('total'));
+        System.assertEquals(0, response.total);
     }
     
     @IsTest
@@ -105,10 +101,9 @@ private class RentalRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = RentalRestService.getRentals();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        RentalListResponseDto response = RentalRestService.getRentals();
         
-        System.assertEquals(1, response.get('total'));
+        System.assertEquals(1, response.total);
     }
     
     @IsTest
@@ -125,10 +120,9 @@ private class RentalRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = RentalRestService.getRentals();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        RentalListResponseDto response = RentalRestService.getRentals();
         
-        System.assertEquals(1, response.get('total'));
+        System.assertEquals(1, response.total);
     }
     
     @IsTest
@@ -160,12 +154,10 @@ private class RentalRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = RentalRestService.getRentals();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
-        List<Object> records = (List<Object>) response.get('records');
+        RentalListResponseDto response = RentalRestService.getRentals();
         
-        System.assertEquals(5, records.size());
-        System.assertEquals(11, response.get('total')); // 10 new + 1 from setup
+        System.assertEquals(5, response.records.size());
+        System.assertEquals(11, response.total); // 10 new + 1 from setup
     }
     
     @IsTest
@@ -187,13 +179,12 @@ private class RentalRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = RentalRestService.createRental();
-        Bike_Rental__c createdRental = (Bike_Rental__c) JSON.deserialize(result, Bike_Rental__c.class);
+        RentalDto createdRental = RentalRestService.createRental();
         
-        System.assertNotEquals(null, createdRental.Id);
-        System.assertEquals(bike.Id, createdRental.Bike__c);
-        System.assertEquals(customer.Id, createdRental.Customer__c);
-        System.assertEquals(200, createdRental.Total_Amount__c); // 4 days * 50
+        System.assertNotEquals(null, createdRental.id);
+        System.assertEquals(bike.Id, createdRental.bikeId);
+        System.assertEquals(customer.Id, createdRental.customerId);
+        System.assertEquals(200, createdRental.totalAmount); // 4 days * 50
         System.assertEquals(201, RestContext.response.statusCode);
     }
     
@@ -214,11 +205,12 @@ private class RentalRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = RentalRestService.createRental();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        RentalRestService.createRental();
         
-        System.assert(response.containsKey('error'));
-        System.assert(((String) response.get('error')).contains('Bike'));
+        String responseBody = RestContext.response.responseBody.toString();
+        Map<String, Object> errorResponse = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
+        System.assert(errorResponse.containsKey('error'));
+        System.assert(((String) errorResponse.get('error')).contains('Bike'));
     }
     
     @IsTest
@@ -238,11 +230,12 @@ private class RentalRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = RentalRestService.createRental();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        RentalRestService.createRental();
         
-        System.assert(response.containsKey('error'));
-        System.assert(((String) response.get('error')).contains('Customer'));
+        String responseBody = RestContext.response.responseBody.toString();
+        Map<String, Object> errorResponse = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
+        System.assert(errorResponse.containsKey('error'));
+        System.assert(((String) errorResponse.get('error')).contains('Customer'));
     }
     
     @IsTest
@@ -264,11 +257,12 @@ private class RentalRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = RentalRestService.createRental();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        RentalRestService.createRental();
         
-        System.assert(response.containsKey('error'));
-        System.assert(((String) response.get('error')).contains('End Date'));
+        String responseBody = RestContext.response.responseBody.toString();
+        Map<String, Object> errorResponse = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
+        System.assert(errorResponse.containsKey('error'));
+        System.assert(((String) errorResponse.get('error')).contains('End Date'));
     }
     
     @IsTest
@@ -290,11 +284,12 @@ private class RentalRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = RentalRestService.createRental();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        RentalRestService.createRental();
         
-        System.assert(response.containsKey('error'));
-        System.assert(((String) response.get('error')).contains('negative'));
+        String responseBody = RestContext.response.responseBody.toString();
+        Map<String, Object> errorResponse = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
+        System.assert(errorResponse.containsKey('error'));
+        System.assert(((String) errorResponse.get('error')).contains('negative'));
     }
     
     @IsTest
@@ -311,11 +306,10 @@ private class RentalRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = RentalRestService.updateRental();
-        Bike_Rental__c updatedRental = (Bike_Rental__c) JSON.deserialize(result, Bike_Rental__c.class);
+        RentalDto updatedRental = RentalRestService.updateRental();
         
-        System.assertEquals('Completed', updatedRental.Status__c);
-        System.assertEquals(true, updatedRental.Paid__c);
+        System.assertEquals('Completed', updatedRental.status);
+        System.assertEquals(true, updatedRental.paid);
     }
     
     @IsTest
@@ -354,10 +348,9 @@ private class RentalRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = RentalRestService.createRental();
-        Bike_Rental__c createdRental = (Bike_Rental__c) JSON.deserialize(result, Bike_Rental__c.class);
+        RentalDto createdRental = RentalRestService.createRental();
         
         // 8 days (10-17 inclusive) * 100 = 800
-        System.assertEquals(800, createdRental.Total_Amount__c);
+        System.assertEquals(800, createdRental.totalAmount);
     }
 }

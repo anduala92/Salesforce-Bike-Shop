@@ -1,7 +1,7 @@
 @RestResource(urlMapping='/bikeshop/v1/bikes/*')
 global with sharing class BikeRestService {
     @HttpGet
-    global static String getBikes() {
+    global static BikeListResponseDto getBikes() {
         try {
             if (!Schema.sObjectType.Bike__c.isAccessible()) {
                 throw new BikeShopApiUtil.ApiException('No read access to Bike.', 403);
@@ -42,14 +42,22 @@ global with sharing class BikeRestService {
                 bikeDtos.add(new BikeDto(bike));
             }
 
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.listResponseWithDtos(bikeDtos, total, page, pageSize));
+            Map<String, Object> response = new Map<String, Object>{
+                'page' => page,
+                'pageSize' => pageSize,
+                'total' => total,
+                'records' => bikeDtos
+            };
+            RestContext.response.statusCode = 200;
+            return (BikeListResponseDto) JSON.deserialize(JSON.serialize(response), BikeListResponseDto.class);
         } catch (Exception ex) {
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
+            BikeShopApiUtil.handleException(ex);
+            return null;
         }
     }
 
     @HttpPost
-    global static String createBike() {
+    global static BikeDto createBike() {
         try {
             if (!Schema.sObjectType.Bike__c.isCreateable()) {
                 throw new BikeShopApiUtil.ApiException('No create access to Bike.', 403);
@@ -78,14 +86,15 @@ global with sharing class BikeRestService {
 
             insert bike;
             RestContext.response.statusCode = 201;
-            return BikeShopApiUtil.formatJsonResponse(new BikeDto(bike));
+            return new BikeDto(bike);
         } catch (Exception ex) {
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
+            BikeShopApiUtil.handleException(ex);
+            return null;
         }
     }
 
     @HttpPatch
-    global static String updateBike() {
+    global static BikeDto updateBike() {
         try {
             if (!Schema.sObjectType.Bike__c.isUpdateable()) {
                 throw new BikeShopApiUtil.ApiException('No update access to Bike.', 403);
@@ -131,11 +140,14 @@ global with sharing class BikeRestService {
             }
 
             update bike;
-            return BikeShopApiUtil.formatJsonResponse(new BikeDto(bike));
+            RestContext.response.statusCode = 200;
+            return new BikeDto(bike);
         } catch (QueryException qex) {
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(new BikeShopApiUtil.ApiException('Bike not found.', 404)));
+            BikeShopApiUtil.handleException(new BikeShopApiUtil.ApiException('Bike not found.', 404));
+            return null;
         } catch (Exception ex) {
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
+            BikeShopApiUtil.handleException(ex);
+            return null;
         }
     }
 

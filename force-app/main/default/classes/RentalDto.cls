@@ -1,17 +1,17 @@
-public class RentalDto {
-    public String id;
-    public String bikeId;
-    public String bikeName;
-    public String customerId;
-    public String customerName;
-    public String startDate;
-    public String endDate;
-    public Decimal dailyPrice;
-    public Decimal totalAmount;
-    public String status;
-    public Boolean paid;
+global class RentalDto {
+    global String id;
+    global String bikeId;
+    global String bikeName;
+    global String customerId;
+    global String customerName;
+    global String startDate;
+    global String endDate;
+    global Decimal dailyPrice;
+    global Decimal totalAmount;
+    global String status;
+    global Boolean paid;
 
-    public RentalDto(Bike_Rental__c rental) {
+    global RentalDto(Bike_Rental__c rental) {
         this.id = rental.Id;
         this.bikeId = rental.Bike__c;
         this.bikeName = rental.Bike__r == null ? null : rental.Bike__r.Name;

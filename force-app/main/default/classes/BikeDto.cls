@@ -1,15 +1,15 @@
-public class BikeDto {
-    public String id;
-    public String name;
-    public String model;
-    public String brand;
-    public String category;
-    public Decimal dailyRate;
-    public Boolean available;
-    public Integer mileage;
-    public String lastServiceDate;
+global class BikeDto {
+    global String id;
+    global String name;
+    global String model;
+    global String brand;
+    global String category;
+    global Decimal dailyRate;
+    global Boolean available;
+    global Integer mileage;
+    global String lastServiceDate;
 
-    public BikeDto(Bike__c bike) {
+    global BikeDto(Bike__c bike) {
         this.id = bike.Id;
         this.name = bike.Name;
         this.model = bike.Model__c;

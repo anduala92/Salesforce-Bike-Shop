@@ -1,15 +1,15 @@
-public class CustomerDto {
-    public String id;
-    public String name;
-    public String firstName;
-    public String lastName;
-    public String email;
-    public String phone;
-    public String birthDate;
-    public Integer loyaltyPoints;
-    public Boolean isActive;
+global class CustomerDto {
+    global String id;
+    global String name;
+    global String firstName;
+    global String lastName;
+    global String email;
+    global String phone;
+    global String birthDate;
+    global Integer loyaltyPoints;
+    global Boolean isActive;
 
-    public CustomerDto(Customer__c customer) {
+    global CustomerDto(Customer__c customer) {
         this.id = customer.Id;
         this.name = customer.Name;
         this.firstName = customer.First_Name__c;

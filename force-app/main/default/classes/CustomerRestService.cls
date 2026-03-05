@@ -1,7 +1,7 @@
 @RestResource(urlMapping='/bikeshop/v1/customers/*')
 global with sharing class CustomerRestService {
     @HttpGet
-    global static String getCustomers() {
+    global static CustomerListResponseDto getCustomers() {
         try {
             if (!Schema.sObjectType.Customer__c.isAccessible()) {
                 throw new BikeShopApiUtil.ApiException('No read access to Customer.', 403);
@@ -45,14 +45,22 @@ global with sharing class CustomerRestService {
                 customerDtos.add(new CustomerDto(customer));
             }
 
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.listResponseWithDtos(customerDtos, total, page, pageSize));
+            Map<String, Object> response = new Map<String, Object>{
+                'page' => page,
+                'pageSize' => pageSize,
+                'total' => total,
+                'records' => customerDtos
+            };
+            RestContext.response.statusCode = 200;
+            return (CustomerListResponseDto) JSON.deserialize(JSON.serialize(response), CustomerListResponseDto.class);
         } catch (Exception ex) {
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
+            BikeShopApiUtil.handleException(ex);
+            return null;
         }
     }
 
     @HttpPost
-    global static String createCustomer() {
+    global static CustomerDto createCustomer() {
         try {
             if (!Schema.sObjectType.Customer__c.isCreateable()) {
                 throw new BikeShopApiUtil.ApiException('No create access to Customer.', 403);
@@ -79,14 +87,15 @@ global with sharing class CustomerRestService {
 
             insert customer;
             RestContext.response.statusCode = 201;
-            return BikeShopApiUtil.formatJsonResponse(new CustomerDto(customer));
+            return new CustomerDto(customer);
         } catch (Exception ex) {
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
+            BikeShopApiUtil.handleException(ex);
+            return null;
         }
     }
 
     @HttpPatch
-    global static String updateCustomer() {
+    global static CustomerDto updateCustomer() {
         try {
             if (!Schema.sObjectType.Customer__c.isUpdateable()) {
                 throw new BikeShopApiUtil.ApiException('No update access to Customer.', 403);
@@ -135,11 +144,14 @@ global with sharing class CustomerRestService {
             }
 
             update customer;
-            return BikeShopApiUtil.formatJsonResponse(new CustomerDto(customer));
+            RestContext.response.statusCode = 200;
+            return new CustomerDto(customer);
         } catch (QueryException qex) {
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(new BikeShopApiUtil.ApiException('Customer not found.', 404)));
+            BikeShopApiUtil.handleException(new BikeShopApiUtil.ApiException('Customer not found.', 404));
+            return null;
         } catch (Exception ex) {
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
+            BikeShopApiUtil.handleException(ex);
+            return null;
         }
     }
 

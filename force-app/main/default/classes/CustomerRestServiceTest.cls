@@ -30,11 +30,10 @@ private class CustomerRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = CustomerRestService.getCustomers();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        CustomerListResponseDto response = CustomerRestService.getCustomers();
         
-        System.assertEquals(1, response.get('total'));
-        System.assert(response.containsKey('records'));
+        System.assertEquals(1, response.total);
+        System.assert(response.records != null);
     }
     
     @IsTest
@@ -48,12 +47,10 @@ private class CustomerRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = CustomerRestService.getCustomers();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        CustomerListResponseDto response = CustomerRestService.getCustomers();
         
-        System.assertEquals(1, response.get('total'));
-        List<Object> records = (List<Object>) response.get('records');
-        System.assertEquals(1, records.size());
+        System.assertEquals(1, response.total);
+        System.assertEquals(1, response.records.size());
     }
     
     @IsTest
@@ -67,10 +64,9 @@ private class CustomerRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = CustomerRestService.getCustomers();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        CustomerListResponseDto response = CustomerRestService.getCustomers();
         
-        System.assertEquals(1, response.get('total'));
+        System.assertEquals(1, response.total);
     }
     
     @IsTest
@@ -84,10 +80,9 @@ private class CustomerRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = CustomerRestService.getCustomers();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        CustomerListResponseDto response = CustomerRestService.getCustomers();
         
-        System.assertEquals(0, response.get('total'));
+        System.assertEquals(0, response.total);
     }
     
     @IsTest
@@ -113,12 +108,10 @@ private class CustomerRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = CustomerRestService.getCustomers();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
-        List<Object> records = (List<Object>) response.get('records');
+        CustomerListResponseDto response = CustomerRestService.getCustomers();
         
-        System.assertEquals(5, records.size());
-        System.assertEquals(13, response.get('total')); // 12 new + 1 from setup
+        System.assertEquals(5, response.records.size());
+        System.assertEquals(13, response.total); // 12 new + 1 from setup
     }
     
     @IsTest
@@ -135,13 +128,12 @@ private class CustomerRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = CustomerRestService.createCustomer();
-        Customer__c createdCustomer = (Customer__c) JSON.deserialize(result, Customer__c.class);
+        CustomerDto createdCustomer = CustomerRestService.createCustomer();
         
-        System.assertNotEquals(null, createdCustomer.Id);
-        System.assertEquals('Jane Smith', createdCustomer.Name);
-        System.assertEquals('jane.smith@example.com', createdCustomer.Email__c);
-        System.assertEquals(true, createdCustomer.Is_Active__c);
+        System.assertNotEquals(null, createdCustomer.id);
+        System.assertEquals('Jane Smith', createdCustomer.name);
+        System.assertEquals('jane.smith@example.com', createdCustomer.email);
+        System.assertEquals(true, createdCustomer.isActive);
         System.assertEquals(201, RestContext.response.statusCode);
     }
     
@@ -157,11 +149,12 @@ private class CustomerRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = CustomerRestService.createCustomer();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        CustomerRestService.createCustomer();
         
-        System.assert(response.containsKey('error'));
-        System.assert(((String) response.get('error')).contains('required'));
+        String responseBody = RestContext.response.responseBody.toString();
+        Map<String, Object> errorResponse = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
+        System.assert(errorResponse.containsKey('error'));
+        System.assert(((String) errorResponse.get('error')).contains('required'));
     }
     
     @IsTest
@@ -177,10 +170,11 @@ private class CustomerRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = CustomerRestService.createCustomer();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        CustomerRestService.createCustomer();
         
-        System.assert(response.containsKey('error'));
+        String responseBody = RestContext.response.responseBody.toString();
+        Map<String, Object> errorResponse = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
+        System.assert(errorResponse.containsKey('error'));
     }
     
     @IsTest
@@ -197,11 +191,10 @@ private class CustomerRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = CustomerRestService.updateCustomer();
-        Customer__c updatedCustomer = (Customer__c) JSON.deserialize(result, Customer__c.class);
+        CustomerDto updatedCustomer = CustomerRestService.updateCustomer();
         
-        System.assertEquals('+359888999999', updatedCustomer.Phone__c);
-        System.assertEquals(250, updatedCustomer.Loyalty_Points__c);
+        System.assertEquals('+359888999999', updatedCustomer.phone);
+        System.assertEquals(250, updatedCustomer.loyaltyPoints);
     }
     
     @IsTest
@@ -218,11 +211,10 @@ private class CustomerRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = CustomerRestService.updateCustomer();
-        Customer__c updatedCustomer = (Customer__c) JSON.deserialize(result, Customer__c.class);
+        CustomerDto updatedCustomer = CustomerRestService.updateCustomer();
         
-        System.assertEquals(originalPhone, updatedCustomer.Phone__c, 'Phone should not change');
-        System.assertEquals(500, updatedCustomer.Loyalty_Points__c);
+        System.assertEquals(originalPhone, updatedCustomer.phone, 'Phone should not change');
+        System.assertEquals(500, updatedCustomer.loyaltyPoints);
     }
     
     @IsTest
@@ -255,9 +247,8 @@ private class CustomerRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = CustomerRestService.createCustomer();
-        Customer__c createdCustomer = (Customer__c) JSON.deserialize(result, Customer__c.class);
+        CustomerDto createdCustomer = CustomerRestService.createCustomer();
         
-        System.assertEquals(true, createdCustomer.Is_Active__c, 'Should default to active');
+        System.assertEquals(true, createdCustomer.isActive, 'Should default to active');
     }
 }

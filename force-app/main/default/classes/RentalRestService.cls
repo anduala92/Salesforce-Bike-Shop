@@ -1,7 +1,7 @@
 @RestResource(urlMapping='/bikeshop/v1/rentals/*')
 global with sharing class RentalRestService {
     @HttpGet
-    global static String getRentals() {
+    global static RentalListResponseDto getRentals() {
         try {
             if (!Schema.sObjectType.Bike_Rental__c.isAccessible()) {
                 throw new BikeShopApiUtil.ApiException('No read access to Rental.', 403);
@@ -63,14 +63,22 @@ global with sharing class RentalRestService {
                 rentalDtos.add(new RentalDto(rental));
             }
 
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.listResponseWithDtos(rentalDtos, total, page, pageSize));
+            Map<String, Object> response = new Map<String, Object>{
+                'page' => page,
+                'pageSize' => pageSize,
+                'total' => total,
+                'records' => rentalDtos
+            };
+            RestContext.response.statusCode = 200;
+            return (RentalListResponseDto) JSON.deserialize(JSON.serialize(response), RentalListResponseDto.class);
         } catch (Exception ex) {
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
+            BikeShopApiUtil.handleException(ex);
+            return null;
         }
     }
 
     @HttpPost
-    global static String createRental() {
+    global static RentalDto createRental() {
         try {
             if (!Schema.sObjectType.Bike_Rental__c.isCreateable()) {
                 throw new BikeShopApiUtil.ApiException('No create access to Rental.', 403);
@@ -115,14 +123,15 @@ global with sharing class RentalRestService {
             insert rental;
             RestContext.response.statusCode = 201;
             rental = [SELECT Id, Bike__c, Bike__r.Name, Customer__c, Customer__r.Name, Start_Date__c, End_Date__c, Daily_Price__c, Total_Amount__c, Status__c, Paid__c FROM Bike_Rental__c WHERE Id = :rental.Id];
-            return BikeShopApiUtil.formatJsonResponse(new RentalDto(rental));
+            return new RentalDto(rental);
         } catch (Exception ex) {
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
+            BikeShopApiUtil.handleException(ex);
+            return null;
         }
     }
 
     @HttpPatch
-    global static String updateRental() {
+    global static RentalDto updateRental() {
         try {
             if (!Schema.sObjectType.Bike_Rental__c.isUpdateable()) {
                 throw new BikeShopApiUtil.ApiException('No update access to Rental.', 403);
@@ -171,11 +180,14 @@ global with sharing class RentalRestService {
 
             update rental;
             rental = [SELECT Id, Bike__c, Bike__r.Name, Customer__c, Customer__r.Name, Start_Date__c, End_Date__c, Daily_Price__c, Total_Amount__c, Status__c, Paid__c FROM Bike_Rental__c WHERE Id = :rental.Id];
-            return BikeShopApiUtil.formatJsonResponse(new RentalDto(rental));
+            RestContext.response.statusCode = 200;
+            return new RentalDto(rental);
         } catch (QueryException qex) {
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(new BikeShopApiUtil.ApiException('Rental not found.', 404)));
+            BikeShopApiUtil.handleException(new BikeShopApiUtil.ApiException('Rental not found.', 404));
+            return null;
         } catch (Exception ex) {
-            return BikeShopApiUtil.formatJsonResponse(BikeShopApiUtil.errorResponse(ex));
+            BikeShopApiUtil.handleException(ex);
+            return null;
         }
     }
 
@@ -190,9 +202,9 @@ global with sharing class RentalRestService {
             delete [SELECT Id FROM Bike_Rental__c WHERE Id = :rentalId LIMIT 1];
             RestContext.response.statusCode = 204;
         } catch (QueryException qex) {
-            RestContext.response.responseBody = Blob.valueOf(JSON.serialize(BikeShopApiUtil.errorResponse(new BikeShopApiUtil.ApiException('Rental not found.', 404))));
+            BikeShopApiUtil.handleException(new BikeShopApiUtil.ApiException('Rental not found.', 404));
         } catch (Exception ex) {
-            RestContext.response.responseBody = Blob.valueOf(JSON.serialize(BikeShopApiUtil.errorResponse(ex)));
+            BikeShopApiUtil.handleException(ex);
         }
     }
 }

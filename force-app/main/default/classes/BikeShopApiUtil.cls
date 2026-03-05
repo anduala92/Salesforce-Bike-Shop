@@ -159,4 +159,17 @@ public with sharing class BikeShopApiUtil {
             'statusCode' => status
         };
     }
+
+    public static void handleException(Exception ex) {
+        Integer status = 500;
+        String message = ex.getMessage();
+        if (ex instanceof ApiException) {
+            status = ((ApiException) ex).statusCode;
+        }
+        RestContext.response.statusCode = status;
+        RestContext.response.responseBody = Blob.valueOf(JSON.serialize(new Map<String, Object>{
+            'error' => message,
+            'statusCode' => status
+        }));
+    }
 }

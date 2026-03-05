@@ -50,9 +50,8 @@ private with sharing class BikeShopApiTest {
         RestContext.request = getReq;
         RestContext.response = new RestResponse();
 
-        String listResult = BikeRestService.getBikes();
-        Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(listResult);
-        System.assertEquals(true, ((List<Object>) payload.get('records')).size() > 0);
+        BikeListResponseDto listPayload = BikeRestService.getBikes();
+        System.assertEquals(true, listPayload.records.size() > 0);
 
         RestRequest postReq = new RestRequest();
         postReq.requestUri = '/services/apexrest/bikeshop/v1/bikes';
@@ -61,27 +60,27 @@ private with sharing class BikeShopApiTest {
         RestContext.request = postReq;
         RestContext.response = new RestResponse();
 
-        Bike__c created = (Bike__c) JSON.deserialize(BikeRestService.createBike(), Bike__c.class);
-        System.assertNotEquals(null, created.Id);
+        BikeDto created = BikeRestService.createBike();
+        System.assertNotEquals(null, created.id);
 
         RestRequest patchReq = new RestRequest();
-        patchReq.requestUri = '/services/apexrest/bikeshop/v1/bikes/' + created.Id;
+        patchReq.requestUri = '/services/apexrest/bikeshop/v1/bikes/' + created.id;
         patchReq.httpMethod = 'PATCH';
         patchReq.requestBody = Blob.valueOf('{"Daily_Rate__c":65}');
         RestContext.request = patchReq;
         RestContext.response = new RestResponse();
 
-        Bike__c updated = (Bike__c) JSON.deserialize(BikeRestService.updateBike(), Bike__c.class);
-        System.assertEquals(65, updated.Daily_Rate__c);
+        BikeDto updated = BikeRestService.updateBike();
+        System.assertEquals(65, updated.dailyRate);
 
         RestRequest deleteReq = new RestRequest();
-        deleteReq.requestUri = '/services/apexrest/bikeshop/v1/bikes/' + created.Id;
+        deleteReq.requestUri = '/services/apexrest/bikeshop/v1/bikes/' + created.id;
         deleteReq.httpMethod = 'DELETE';
         RestContext.request = deleteReq;
         RestContext.response = new RestResponse();
 
         BikeRestService.deleteBike();
-        System.assertEquals(0, [SELECT COUNT() FROM Bike__c WHERE Id = :created.Id]);
+        System.assertEquals(0, [SELECT COUNT() FROM Bike__c WHERE Id = :created.id]);
     }
 
     @IsTest
@@ -95,9 +94,8 @@ private with sharing class BikeShopApiTest {
         RestContext.request = getReq;
         RestContext.response = new RestResponse();
 
-        String listResult = CustomerRestService.getCustomers();
-        Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(listResult);
-        System.assertEquals(true, ((List<Object>) payload.get('records')).size() > 0);
+        CustomerListResponseDto listPayload = CustomerRestService.getCustomers();
+        System.assertEquals(true, listPayload.records.size() > 0);
 
         RestRequest postReq = new RestRequest();
         postReq.requestUri = '/services/apexrest/bikeshop/v1/customers';
@@ -106,27 +104,27 @@ private with sharing class BikeShopApiTest {
         RestContext.request = postReq;
         RestContext.response = new RestResponse();
 
-        Customer__c created = (Customer__c) JSON.deserialize(CustomerRestService.createCustomer(), Customer__c.class);
-        System.assertNotEquals(null, created.Id);
+        CustomerDto created = CustomerRestService.createCustomer();
+        System.assertNotEquals(null, created.id);
 
         RestRequest patchReq = new RestRequest();
-        patchReq.requestUri = '/services/apexrest/bikeshop/v1/customers/' + created.Id;
+        patchReq.requestUri = '/services/apexrest/bikeshop/v1/customers/' + created.id;
         patchReq.httpMethod = 'PATCH';
         patchReq.requestBody = Blob.valueOf('{"Phone__c":"+359888000111"}');
         RestContext.request = patchReq;
         RestContext.response = new RestResponse();
 
-        Customer__c updated = (Customer__c) JSON.deserialize(CustomerRestService.updateCustomer(), Customer__c.class);
-        System.assertEquals('+359888000111', updated.Phone__c);
+        CustomerDto updated = CustomerRestService.updateCustomer();
+        System.assertEquals('+359888000111', updated.phone);
 
         RestRequest deleteReq = new RestRequest();
-        deleteReq.requestUri = '/services/apexrest/bikeshop/v1/customers/' + created.Id;
+        deleteReq.requestUri = '/services/apexrest/bikeshop/v1/customers/' + created.id;
         deleteReq.httpMethod = 'DELETE';
         RestContext.request = deleteReq;
         RestContext.response = new RestResponse();
 
         CustomerRestService.deleteCustomer();
-        System.assertEquals(0, [SELECT COUNT() FROM Customer__c WHERE Id = :created.Id]);
+        System.assertEquals(0, [SELECT COUNT() FROM Customer__c WHERE Id = :created.id]);
     }
 
     @IsTest
@@ -143,9 +141,8 @@ private with sharing class BikeShopApiTest {
         RestContext.request = getReq;
         RestContext.response = new RestResponse();
 
-        String listResult = RentalRestService.getRentals();
-        Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(listResult);
-        System.assertEquals(true, ((List<Object>) payload.get('records')).size() > 0);
+        RentalListResponseDto listPayload = RentalRestService.getRentals();
+        System.assertEquals(true, listPayload.records.size() > 0);
 
         RestRequest postReq = new RestRequest();
         postReq.requestUri = '/services/apexrest/bikeshop/v1/rentals';
@@ -154,27 +151,27 @@ private with sharing class BikeShopApiTest {
         RestContext.request = postReq;
         RestContext.response = new RestResponse();
 
-        Bike_Rental__c created = (Bike_Rental__c) JSON.deserialize(RentalRestService.createRental(), Bike_Rental__c.class);
-        System.assertNotEquals(null, created.Id);
+        RentalDto created = RentalRestService.createRental();
+        System.assertNotEquals(null, created.id);
 
         RestRequest patchReq = new RestRequest();
-        patchReq.requestUri = '/services/apexrest/bikeshop/v1/rentals/' + created.Id;
+        patchReq.requestUri = '/services/apexrest/bikeshop/v1/rentals/' + created.id;
         patchReq.httpMethod = 'PATCH';
         patchReq.requestBody = Blob.valueOf('{"Status__c":"Completed","Paid__c":true}');
         RestContext.request = patchReq;
         RestContext.response = new RestResponse();
 
-        Bike_Rental__c updated = (Bike_Rental__c) JSON.deserialize(RentalRestService.updateRental(), Bike_Rental__c.class);
-        System.assertEquals('Completed', updated.Status__c);
-        System.assertEquals(true, updated.Paid__c);
+        RentalDto updated = RentalRestService.updateRental();
+        System.assertEquals('Completed', updated.status);
+        System.assertEquals(true, updated.paid);
 
         RestRequest deleteReq = new RestRequest();
-        deleteReq.requestUri = '/services/apexrest/bikeshop/v1/rentals/' + created.Id;
+        deleteReq.requestUri = '/services/apexrest/bikeshop/v1/rentals/' + created.id;
         deleteReq.httpMethod = 'DELETE';
         RestContext.request = deleteReq;
         RestContext.response = new RestResponse();
 
         RentalRestService.deleteRental();
-        System.assertEquals(0, [SELECT COUNT() FROM Bike_Rental__c WHERE Id = :created.Id]);
+        System.assertEquals(0, [SELECT COUNT() FROM Bike_Rental__c WHERE Id = :created.id]);
     }
 }

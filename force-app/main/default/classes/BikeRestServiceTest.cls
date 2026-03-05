@@ -30,11 +30,10 @@ private class BikeRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = BikeRestService.getBikes();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        BikeListResponseDto response = BikeRestService.getBikes();
         
-        System.assertEquals(1, response.get('total'));
-        System.assert(response.containsKey('records'));
+        System.assertEquals(1, response.total);
+        System.assert(response.records != null);
     }
     
     @IsTest
@@ -48,12 +47,10 @@ private class BikeRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = BikeRestService.getBikes();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        BikeListResponseDto response = BikeRestService.getBikes();
         
-        System.assertEquals(1, response.get('total'));
-        List<Object> records = (List<Object>) response.get('records');
-        System.assertEquals(1, records.size());
+        System.assertEquals(1, response.total);
+        System.assertEquals(1, response.records.size());
     }
     
     @IsTest
@@ -67,10 +64,9 @@ private class BikeRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = BikeRestService.getBikes();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        BikeListResponseDto response = BikeRestService.getBikes();
         
-        System.assertEquals(0, response.get('total'));
+        System.assertEquals(0, response.total);
     }
     
     @IsTest
@@ -97,12 +93,10 @@ private class BikeRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = BikeRestService.getBikes();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
-        List<Object> records = (List<Object>) response.get('records');
+        BikeListResponseDto response = BikeRestService.getBikes();
         
-        System.assertEquals(5, records.size(), 'Should return 5 records');
-        System.assertEquals(16, response.get('total'), 'Total should be 16 (15 new + 1 from setup)');
+        System.assertEquals(5, response.records.size(), 'Should return 5 records');
+        System.assertEquals(16, response.total, 'Total should be 16 (15 new + 1 from setup)');
     }
     
     @IsTest
@@ -119,13 +113,12 @@ private class BikeRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = BikeRestService.createBike();
-        Bike__c createdBike = (Bike__c) JSON.deserialize(result, Bike__c.class);
+        BikeDto createdBike = BikeRestService.createBike();
         
-        System.assertNotEquals(null, createdBike.Id);
-        System.assertEquals('Cannondale Topstone 3', createdBike.Name);
-        System.assertEquals('Topstone 3', createdBike.Model__c);
-        System.assertEquals(65, createdBike.Daily_Rate__c);
+        System.assertNotEquals(null, createdBike.id);
+        System.assertEquals('Cannondale Topstone 3', createdBike.name);
+        System.assertEquals('Topstone 3', createdBike.model);
+        System.assertEquals(65, createdBike.dailyRate);
         System.assertEquals(201, RestContext.response.statusCode);
     }
     
@@ -142,11 +135,12 @@ private class BikeRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = BikeRestService.createBike();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        BikeRestService.createBike();
         
-        System.assert(response.containsKey('error'));
-        System.assert(((String) response.get('error')).contains('required'));
+        String responseBody = RestContext.response.responseBody.toString();
+        Map<String, Object> errorResponse = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
+        System.assert(errorResponse.containsKey('error'));
+        System.assert(((String) errorResponse.get('error')).contains('required'));
     }
     
     @IsTest
@@ -163,11 +157,12 @@ private class BikeRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = BikeRestService.createBike();
-        Map<String, Object> response = (Map<String, Object>) JSON.deserializeUntyped(result);
+        BikeRestService.createBike();
         
-        System.assert(response.containsKey('error'));
-        System.assert(((String) response.get('error')).contains('negative'));
+        String responseBody = RestContext.response.responseBody.toString();
+        Map<String, Object> errorResponse = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
+        System.assert(errorResponse.containsKey('error'));
+        System.assert(((String) errorResponse.get('error')).contains('negative'));
     }
     
     @IsTest
@@ -184,11 +179,10 @@ private class BikeRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = BikeRestService.updateBike();
-        Bike__c updatedBike = (Bike__c) JSON.deserialize(result, Bike__c.class);
+        BikeDto updatedBike = BikeRestService.updateBike();
         
-        System.assertEquals(75, updatedBike.Daily_Rate__c);
-        System.assertEquals(1000, updatedBike.Mileage__c);
+        System.assertEquals(75, updatedBike.dailyRate);
+        System.assertEquals(1000, updatedBike.mileage);
     }
     
     @IsTest
@@ -205,11 +199,10 @@ private class BikeRestServiceTest {
         RestContext.request = req;
         RestContext.response = new RestResponse();
         
-        String result = BikeRestService.updateBike();
-        Bike__c updatedBike = (Bike__c) JSON.deserialize(result, Bike__c.class);
+        BikeDto updatedBike = BikeRestService.updateBike();
         
-        System.assertEquals(originalRate, updatedBike.Daily_Rate__c, 'Daily rate should not change');
-        System.assertEquals(2500, updatedBike.Mileage__c);
+        System.assertEquals(originalRate, updatedBike.dailyRate, 'Daily rate should not change');
+        System.assertEquals(2500, updatedBike.mileage);
     }
     
     @IsTest
